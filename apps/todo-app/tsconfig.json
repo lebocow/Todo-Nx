@@ -6,9 +6,15 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
+    "baseUrl": ".",
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "paths": {
+      "@lib/*": ["src/app/lib/*"],
+      "@pages/*": ["src/app/pages/*"],
+      "@env/*": ["src/environments/*"]
+    },
+    "noFallthroughCasesInSwitch": true,
   },
   "files": [],
   "include": [],

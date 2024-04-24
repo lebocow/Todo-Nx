@@ -1,0 +1,39 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background: var(--main-color)
+}
+
+.container {
+  display: flex;
+  overflow: hidden;
+  justify-content: space-between;
+  width: 50rem;
+  border-radius: 0.5rem;
+  background: var(--white-color);
+
+  &__info {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--white-color);
+    background: var(--secondary-color)
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 3rem;
+
+    &__title {
+      text-align: center;
+      color: var(--main-color);
+    }
+  }
+}

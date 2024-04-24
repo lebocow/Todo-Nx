@@ -1,1 +1,31 @@
-<p>login works!</p>
+<div class="container">
+  <form class="container__form">
+    <h1 class="container__form__title">Sign in to Cando</h1>
+
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input matInput />
+    </mat-form-field>
+
+    <button (click)="onSignIn()" color="primary" mat-flat-button type="button">
+      Sign In
+    </button>
+  </form>
+
+  <div class="container__info">
+    <h1>Hello, Friend!</h1>
+    <button
+      [routerLink]="['/auth', 'register']"
+      color="primary"
+      mat-flat-button
+      type="button"
+    >
+      Sign Up
+    </button>
+  </div>
+</div>
