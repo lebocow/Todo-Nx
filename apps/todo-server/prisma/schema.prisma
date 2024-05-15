@@ -18,6 +18,7 @@ model User {
   email     String   @unique
   name      String
   password  String   @db.VarChar(255)
+  role      Role     @default(USER)
   tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,13 +34,6 @@ model Token {
   createdAt   DateTime  @default(now())
   user        User      @relation(fields: [userId], references: [id])
   userId      String
-}
-
-enum TokenType {
-  ACCESS
-  REFRESH
-  RESET_PASSWORD
-  VERIFY_EMAIL
 }
 
 model Task {
@@ -60,4 +54,16 @@ model Category {
   id    String @id @default(uuid())
   name  String @db.VarChar(255)
   tasks Task[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TokenType {
+  ACCESS
+  REFRESH
+  RESET_PASSWORD
+  VERIFY_EMAIL
 }

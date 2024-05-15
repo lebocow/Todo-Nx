@@ -14,7 +14,7 @@
       "@pages/*": ["src/app/pages/*"],
       "@env/*": ["src/environments/*"]
     },
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": [],

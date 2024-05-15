@@ -1,15 +1,15 @@
 <div class="container">
-  <form class="container__form">
+  <form [formGroup]="loginForm" class="container__form">
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input matInput />
+      <input formControlName="email" matInput />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input matInput />
+      <input formControlName="password" type="password" matInput />
     </mat-form-field>
 
     <button (click)="onSignIn()" color="primary" mat-flat-button type="button">

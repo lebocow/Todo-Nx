@@ -5,6 +5,12 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -16,17 +22,29 @@ import { AuthService } from '@lib/services';
     MatInput,
     MatLabel,
     RouterLink,
+    ReactiveFormsModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private authSvc = inject(AuthService);
-  private router: Router = inject(Router);
+  private readonly authSvc = inject(AuthService);
+
+  email = new FormControl<string>('', [Validators.required, Validators.email]);
+  password = new FormControl<string>('', [Validators.required]);
+
+  loginForm = new FormGroup({
+    email: this.email,
+    password: this.password,
+  });
 
   onSignIn() {
-    this.authSvc.login();
-    this.router.navigate(['/']);
+    if (this.loginForm.invalid) return;
+
+    const email = this.loginForm.value.email ?? '';
+    const password = this.loginForm.value.password ?? '';
+
+    this.authSvc.login(email, password);
   }
 }

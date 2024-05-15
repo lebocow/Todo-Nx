@@ -1,3 +1,4 @@
-export * from './lib/user.schema';
-export * from './lib/category.schema';
-export * from './lib/task.schema';
+export * from './lib/auth';
+export * from './lib/category';
+export * from './lib/task';
+export * from './lib/user';
