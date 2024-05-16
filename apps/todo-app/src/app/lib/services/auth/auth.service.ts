@@ -1,5 +1,4 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { AuthResponseSchema } from './../../../../../../../shared/data-models/src/lib/auth/auth.response.schema';
+import { AuthResponseSchema } from '@myworkspace/data-models';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';

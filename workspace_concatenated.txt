@@ -1,242 +1,225 @@
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/.eslintrc.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/.eslintrc.json
 {
   "extends": ["../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.js", "*.jsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.json"],
-      "parser": "jsonc-eslint-parser",
+      "files": ["*.ts"],
+      "extends": [
+        "plugin:@nx/angular",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
       "rules": {
-        "@nx/dependency-checks": [
+        "@angular-eslint/directive-selector": [
           "error",
           {
-            "ignoredFiles": ["{projectRoot}/esbuild.config.{js,ts,mjs,mts}"]
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
           }
         ]
       }
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@nx/angular-template"],
+      "rules": {}
     }
   ]
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/jest.config.ts
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/jest.config.ts
 /* eslint-disable */
 export default {
-  displayName: 'data-models',
+  displayName: 'todo-app',
   preset: '../../jest.preset.js',
-  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  coverageDirectory: '../../coverage/apps/todo-app',
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    '^.+\\.(ts|mjs|js|html)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.(html|svg)$',
+      },
+    ],
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/shared/data-models',
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  snapshotSerializers: [
+    'jest-preset-angular/build/serializers/no-ng-attributes',
+    'jest-preset-angular/build/serializers/ng-snapshot',
+    'jest-preset-angular/build/serializers/html-comment',
+  ],
 };
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/package.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/project.json
 {
-  "name": "@myworkspace/data-models",
-  "version": "0.0.1",
-  "dependencies": {},
-  "type": "commonjs",
-  "main": "./index.cjs",
-  "private": true
-}
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/project.json
-{
-  "name": "data-models",
+  "name": "todo-app",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "shared/data-models/src",
-  "projectType": "library",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/todo-app/src",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/esbuild:esbuild",
+      "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/shared/data-models",
-        "main": "shared/data-models/src/index.ts",
-        "tsConfig": "shared/data-models/tsconfig.lib.json",
-        "assets": [],
-        "generatePackageJson": true,
-        "format": ["cjs"]
+        "outputPath": "dist/apps/todo-app",
+        "index": "apps/todo-app/src/index.html",
+        "browser": "apps/todo-app/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/todo-app/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": ["apps/todo-app/src/favicon.ico", "apps/todo-app/src/assets"],
+        "styles": ["apps/todo-app/src/styles.scss"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "todo-app:build:production"
+        },
+        "development": {
+          "buildTarget": "todo-app:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "apps/todo-app/proxy.conf.json"
       }
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "todo-app:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "shared/data-models/jest.config.ts"
+        "jestConfig": "apps/todo-app/jest.config.ts"
       }
     }
   }
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/index.ts
-export * from './lib/auth';
-export * from './lib/category';
-export * from './lib/task';
-export * from './lib/user';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/proxy.conf.json
+{
+  "/api": {
+    "target": "http://localhost:3000",
+    "secure": false
+  }
+}
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/auth.schema.ts
-import { z } from 'zod';
-
-export const LoginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.html
+<router-outlet></router-outlet>
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/index.ts
-export * from './auth.schema';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.scss
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/category.schema.ts
-import { z } from 'zod';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-export const CategorySchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-});
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/index.ts
-export * from './category.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/index.ts
-export * from './task.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/task.schema.ts
-import { z } from 'zod';
-
-export const TaskSchema = z.object({
-  id: z.string().uuid(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  title: z.string(),
-  description: z.string().optional(),
-  dueDate: z.date().optional(),
-  completed: z.boolean(),
-  categoryId: z.string().uuid(),
-  userId: z.string().uuid(),
-});
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/index.ts
-export * from './user.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/user.schema.ts
-import { z } from 'zod';
-
-export const BaseUserSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export const RegistrationSchema = BaseUserSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+@Component({
+  standalone: true,
+  imports: [RouterModule],
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-  .extend({
-    password: z.string().min(8),
-    passwordConfirmation: z.string().min(8),
-  })
-  .refine((data) => data.password === data.passwordConfirmation, {
-    message: "Passwords don't match",
-    path: ['passwordConfirmation'],
-  });
-
-export const UpdatePasswordSchema = z
-  .object({
-    oldPassword: z.string(),
-    newPassword: z.string().min(8),
-    newPasswordConfirmation: z.string().min(8),
-  })
-  .refine((data) => data.newPassword === data.newPasswordConfirmation, {
-    message: "New passwords don't match",
-    path: ['newPasswordConfirmation'],
-  });
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+export class AppComponent {
+  title = 'todo-app';
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.lib.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "declaration": true,
-    "types": ["node"]
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter, withViewTransitions } from '@angular/router';
+import { appRoutes } from './app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideHttpClient } from '@angular/common/http';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(
+      appRoutes,
+      withViewTransitions({ skipInitialTransition: true })
+    ),
+    provideAnimationsAsync(),
+    provideHttpClient(),
+  ],
+};
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.routes.ts
+import { Route } from '@angular/router';
+import { authGuard } from '@lib/guards';
+
+export const appRoutes: Route[] = [
+  {
+    path: 'auth',
+    loadChildren: async () =>
+      await import('./pages/auth').then((m) => m.routes),
+    canMatch: [authGuard({ requiresAuthentication: false })],
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
-}
 
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.spec.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"]
+  {
+    path: '',
+    loadChildren: async () =>
+      await import('./pages/dashboard').then((m) => m.routes),
+    canMatch: [authGuard()],
   },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
-}
+];
 
 
-m './sidenav/sidenav.component';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
+export * from './navbar/navbar.component';
+export * from './sidenav/sidenav.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
@@ -297,7 +280,7 @@ import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
   ],
 })
 export class NavbarComponent {
-  isHandset = input.required<boolean | undefined>();
+  isHandset = input.required<boolean | null>();
 }
 
 
@@ -360,7 +343,7 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidenavComponent {
-  isHandset = input.required<boolean | undefined>();
+  isHandset = input.required<boolean | null>();
 
   drawer = viewChild.required<MatSidenav>('drawer');
 
@@ -409,22 +392,66 @@ export * from './auth/auth.guard';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/auth/auth.service.ts
-import { Injectable, signal } from '@angular/core';
+import { AuthResponseSchema } from '@myworkspace/data-models';
+import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
+import { z } from 'zod';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  isAuthenticated = signal<boolean>(false);
+  readonly isAuthenticated = signal<boolean>(false);
 
-  login(): void {
-    this.isAuthenticated.set(true);
+  private readonly router = inject(Router);
+  private readonly httpClient = inject(HttpClient);
+  private readonly cookieSvc = inject(CookieService);
+
+  login(email: string, password: string): void {
+    this.httpClient
+      .post<z.infer<typeof AuthResponseSchema>>(
+        'http://localhost:3000/v1/auth/login',
+        { email, password }
+      )
+      .subscribe({
+        next: (res) => {
+          this.cookieSvc.set('accessToken', res.tokens.access.token, {
+            expires: new Date(res.tokens.access.expires),
+            sameSite: 'Strict',
+            secure: true,
+          });
+
+          this.cookieSvc.set('refreshToken', res.tokens.refresh.token, {
+            expires: new Date(res.tokens.refresh.expires),
+            sameSite: 'Strict',
+            secure: true,
+          });
+
+          this.isAuthenticated.set(true);
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          console.error('Login failed:', error);
+        },
+      });
+  }
+
+  get accessToken(): string {
+    return this.cookieSvc.get('accessToken');
+  }
+
+  get refreshToken(): string {
+    return this.cookieSvc.get('refreshToken');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   register(): void {}
 
   logout(): void {
+    this.cookieSvc.delete('accessToken');
+    this.cookieSvc.delete('refreshToken');
     this.isAuthenticated.set(false);
   }
 }
@@ -457,17 +484,17 @@ export const routes: Routes = [
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/login/login.component.html
 <div class="container">
-  <form class="container__form">
+  <form [formGroup]="loginForm" class="container__form">
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input matInput />
+      <input formControlName="email" matInput />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input matInput />
+      <input formControlName="password" type="password" matInput />
     </mat-form-field>
 
     <button (click)="onSignIn()" color="primary" mat-flat-button type="button">
@@ -540,6 +567,12 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -551,18 +584,30 @@ import { AuthService } from '@lib/services';
     MatInput,
     MatLabel,
     RouterLink,
+    ReactiveFormsModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private authSvc = inject(AuthService);
-  private router: Router = inject(Router);
+  private readonly authSvc = inject(AuthService);
+
+  email = new FormControl<string>('', [Validators.required, Validators.email]);
+  password = new FormControl<string>('', [Validators.required]);
+
+  loginForm = new FormGroup({
+    email: this.email,
+    password: this.password,
+  });
 
   onSignIn() {
-    this.authSvc.login();
-    this.router.navigate(['/']);
+    if (this.loginForm.invalid) return;
+
+    const email = this.loginForm.value.email ?? '';
+    const password = this.loginForm.value.password ?? '';
+
+    this.authSvc.login(email, password);
   }
 }
 
@@ -679,7 +724,7 @@ export class RegisterComponent {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.html
-<app-navbar [isHandset]="isHandset()"> </app-navbar>
+<app-navbar [isHandset]="isHandset$ | async"> </app-navbar>
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.scss
@@ -691,7 +736,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map, shareReplay } from 'rxjs/operators';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -704,13 +749,12 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 export class DashboardComponent {
   private breakpointObserver = inject(BreakpointObserver);
 
-  isHandset = toSignal(
-    this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-      takeUntilDestroyed(),
+  isHandset$: Observable<boolean> = this.breakpointObserver
+    .observe(Breakpoints.Handset)
+    .pipe(
       map((result) => result.matches),
       shareReplay()
-    )
-  );
+    );
 }
 
 
@@ -866,9 +910,10 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/tsconfig
     "paths": {
       "@lib/*": ["src/app/lib/*"],
       "@pages/*": ["src/app/pages/*"],
-      "@env/*": ["src/environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@myworkspace/data-models": ["../../shared/data-models/src/index.ts"]
     },
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   },
   "files": [],
   "include": [],
