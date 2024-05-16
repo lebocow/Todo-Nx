@@ -13,7 +13,6 @@
         "main": "shared/data-models/src/index.ts",
         "tsConfig": "shared/data-models/tsconfig.lib.json",
         "assets": [],
-        "generatePackageJson": true,
         "format": ["cjs"]
       }
     },
