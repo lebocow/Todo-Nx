@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
@@ -14,12 +15,23 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+  private readonly httpClient = inject(HttpClient);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
       map((result) => result.matches),
-      shareReplay()
+      shareReplay(),
     );
+
+  testMethod() {
+    this.httpClient.post('http://localhost:3000/v1/task/test', {}).subscribe({
+      next: (response) => console.log(response),
+      error: (error) => {
+        console.log('aici');
+      },
+      complete: () => console.info('complete'),
+    });
+  }
 }

@@ -1,4 +1,3 @@
-import { TokenType } from '@prisma/client';
 import { z } from 'zod';
 
 export const BaseUserSchema = z.object({
@@ -34,8 +33,6 @@ export const UpdatePasswordSchema = z
     path: ['newPasswordConfirmation'],
   });
 
-export const TokenSchema = z.object({
-  token: z.string(),
-  expires: z.number().int().positive(),
-  type: z.nativeEnum(TokenType),
-});
+export type IUser = z.infer<typeof BaseUserSchema>;
+export type IRegistration = z.infer<typeof RegistrationSchema>;
+export type IUpdatePassword = z.infer<typeof UpdatePasswordSchema>;

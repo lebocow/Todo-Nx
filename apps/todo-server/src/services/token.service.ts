@@ -3,14 +3,22 @@ import z from 'zod';
 import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
+import prisma from '../client.js';
+
+interface JwtPayload {
+  sub: string;
+  iat: number;
+  exp: number;
+  type: TokenType;
+}
 
 const generateToken = (
   userId: string,
   expires: Date,
   type: TokenType,
-  secret = config.jwt.secret
+  secret = config.jwt.secret,
 ): string => {
-  const payload = {
+  const payload: JwtPayload = {
     sub: userId,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(expires.getTime() / 1000),
@@ -19,8 +27,48 @@ const generateToken = (
   return jwt.sign(payload, secret);
 };
 
+const saveToken = async (
+  userId: string,
+  token: string,
+  expires: Date,
+  type: TokenType,
+  blacklisted = false,
+) => {
+  const existingToken = await prisma.token.findFirst({
+    where: {
+      userId,
+      type,
+    },
+  });
+
+  if (existingToken) {
+    await prisma.token.update({
+      where: {
+        id: existingToken.id,
+      },
+      data: {
+        token,
+        expires,
+        blacklisted,
+      },
+    });
+
+    return existingToken;
+  }
+
+  return await prisma.token.create({
+    data: {
+      userId,
+      token,
+      expires,
+      type,
+      blacklisted,
+    },
+  });
+};
+
 export const generateAuthTokens = async (
-  user: z.infer<typeof BaseUserSchema>
+  user: z.infer<typeof BaseUserSchema>,
 ) => {
   const { id } = user;
 
@@ -29,7 +77,7 @@ export const generateAuthTokens = async (
   const accessToken = generateToken(
     id,
     new Date(accesTokenExpires),
-    TokenType.ACCESS
+    TokenType.ACCESS,
   );
 
   const refreshTokenExpires =
@@ -37,7 +85,14 @@ export const generateAuthTokens = async (
   const refreshToken = generateToken(
     id,
     new Date(refreshTokenExpires),
-    TokenType.REFRESH
+    TokenType.REFRESH,
+  );
+
+  await saveToken(
+    id,
+    refreshToken,
+    new Date(refreshTokenExpires),
+    TokenType.REFRESH,
   );
 
   return {
@@ -50,4 +105,25 @@ export const generateAuthTokens = async (
       expires: refreshTokenExpires,
     },
   };
+};
+
+export const verifyToken = async (token: string, type: TokenType) => {
+  const payload = jwt.verify(token, config.jwt.secret) as JwtPayload;
+
+  const userId = payload.sub;
+
+  if (payload.type !== type) throw new Error('Invalid token type');
+
+  const tokenData = await prisma.token.findFirst({
+    where: {
+      userId,
+      token,
+      type,
+      blacklisted: false,
+    },
+  });
+
+  if (!tokenData) throw new Error('Token not found!');
+
+  return tokenData;
 };

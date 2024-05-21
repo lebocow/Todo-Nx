@@ -35,3 +35,9 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 
   return res.status(httpStatus.OK).json({ user, tokens });
 });
+
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const tokens = await authService.refreshAuth(req.body.refreshToken);
+
+  return res.status(httpStatus.OK).json(tokens);
+});

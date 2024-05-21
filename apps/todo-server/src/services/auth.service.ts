@@ -1,18 +1,15 @@
-import z from 'zod';
-import { BaseUserSchema } from '@myworkspace/data-models';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
 import httpStatus from 'http-status';
 import { exclude } from '../utils/exclude';
-
-export const generateAuthToken = (user: z.infer<typeof BaseUserSchema>) => {
-  return user.id;
-};
+import { tokenService } from '.';
+import { TokenType } from '@prisma/client';
+import { ITokens } from 'shared/data-models/src/lib/token';
 
 export const loginUserWithEmailAndPassword = async (
   email: string,
-  password: string
+  password: string,
 ) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -28,4 +25,25 @@ export const loginUserWithEmailAndPassword = async (
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid password');
 
   return exclude(user, ['password']);
+};
+
+export const refreshAuth = async (refreshToken: string): Promise<ITokens> => {
+  try {
+    const refreshTokenData = await tokenService.verifyToken(
+      refreshToken,
+      TokenType.REFRESH,
+    );
+
+    const { userId } = refreshTokenData;
+
+    await prisma.token.delete({
+      where: {
+        id: refreshTokenData.id,
+      },
+    });
+
+    return tokenService.generateAuthTokens({ id: userId });
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please Authenticate');
+  }
 };

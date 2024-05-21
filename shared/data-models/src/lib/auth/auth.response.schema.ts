@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { BaseUserSchema, TokenSchema } from '../user';
+import { BaseUserSchema } from '../user';
+import { TokensSchema } from '../token';
 
 export const AuthResponseSchema = z.object({
   user: BaseUserSchema,
-  tokens: z.object({
-    access: TokenSchema,
-    refresh: TokenSchema,
-  }),
+  tokens: TokensSchema,
 });
+
+export type IAuthResponse = z.infer<typeof AuthResponseSchema>;

@@ -1,257 +1,289 @@
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/.eslintrc.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/.eslintrc.json
 {
   "extends": ["../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
-      "files": ["*.ts"],
-      "extends": [
-        "plugin:@nx/angular",
-        "plugin:@angular-eslint/template/process-inline-templates"
-      ],
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {}
+    },
+    {
+      "files": ["*.json"],
+      "parser": "jsonc-eslint-parser",
       "rules": {
-        "@angular-eslint/directive-selector": [
+        "@nx/dependency-checks": [
           "error",
           {
-            "type": "attribute",
-            "prefix": "app",
-            "style": "camelCase"
-          }
-        ],
-        "@angular-eslint/component-selector": [
-          "error",
-          {
-            "type": "element",
-            "prefix": "app",
-            "style": "kebab-case"
+            "ignoredFiles": ["{projectRoot}/esbuild.config.{js,ts,mjs,mts}"]
           }
         ]
       }
-    },
-    {
-      "files": ["*.html"],
-      "extends": ["plugin:@nx/angular-template"],
-      "rules": {}
     }
   ]
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/jest.config.ts
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/jest.config.ts
 /* eslint-disable */
 export default {
-  displayName: 'todo-app',
+  displayName: 'data-models',
   preset: '../../jest.preset.js',
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/todo-app',
+  testEnvironment: 'node',
   transform: {
-    '^.+\\.(ts|mjs|js|html)$': [
-      'jest-preset-angular',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        stringifyContentPathRegex: '\\.(html|svg)$',
-      },
-    ],
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
-  snapshotSerializers: [
-    'jest-preset-angular/build/serializers/no-ng-attributes',
-    'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
-  ],
+  moduleFileExtensions: ['ts', 'js', 'html'],
+  coverageDirectory: '../../coverage/shared/data-models',
 };
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/project.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/package.json
 {
-  "name": "todo-app",
+  "name": "@myworkspace/data-models",
+  "version": "0.0.1",
+  "dependencies": {},
+  "type": "commonjs",
+  "main": "./index.cjs",
+  "private": true
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/project.json
+{
+  "name": "data-models",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "application",
-  "prefix": "app",
-  "sourceRoot": "apps/todo-app/src",
+  "sourceRoot": "shared/data-models/src",
+  "projectType": "library",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/todo-app",
-        "index": "apps/todo-app/src/index.html",
-        "browser": "apps/todo-app/src/main.ts",
-        "polyfills": ["zone.js"],
-        "tsConfig": "apps/todo-app/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
-        "assets": ["apps/todo-app/src/favicon.ico", "apps/todo-app/src/assets"],
-        "styles": ["apps/todo-app/src/styles.scss"],
-        "scripts": []
-      },
-      "configurations": {
-        "production": {
-          "budgets": [
-            {
-              "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
-            },
-            {
-              "type": "anyComponentStyle",
-              "maximumWarning": "2kb",
-              "maximumError": "4kb"
-            }
-          ],
-          "outputHashing": "all"
-        },
-        "development": {
-          "optimization": false,
-          "extractLicenses": false,
-          "sourceMap": true
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
-      "configurations": {
-        "production": {
-          "buildTarget": "todo-app:build:production"
-        },
-        "development": {
-          "buildTarget": "todo-app:build:development"
-        }
-      },
-      "defaultConfiguration": "development",
-      "options": {
-        "proxyConfig": "apps/todo-app/proxy.conf.json"
+        "outputPath": "dist/shared/data-models",
+        "main": "shared/data-models/src/index.ts",
+        "tsConfig": "shared/data-models/tsconfig.lib.json",
+        "assets": [],
+        "format": ["cjs"]
       }
-    },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "todo-app:build"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/todo-app/jest.config.ts"
+        "jestConfig": "shared/data-models/jest.config.ts"
       }
     }
   }
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/proxy.conf.json
-{
-  "/api": {
-    "target": "http://localhost:3000",
-    "secure": false
-  }
-}
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/index.ts
+export * from './lib/auth';
+export * from './lib/category';
+export * from './lib/task';
+export * from './lib/user';
+export * from './lib/token';
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.html
-<router-outlet></router-outlet>
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/auth.response.schema.ts
+import { z } from 'zod';
+import { BaseUserSchema } from '../user';
+import { TokensSchema } from '../token';
+
+export const AuthResponseSchema = z.object({
+  user: BaseUserSchema,
+  tokens: TokensSchema,
+});
+
+export type IAuthResponse = z.infer<typeof AuthResponseSchema>;
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.scss
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/auth.schema.ts
+import { z } from 'zod';
+
+export const LoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export type ILoginInput = z.infer<typeof LoginSchema>;
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.ts
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/index.ts
+export * from './auth.schema';
+export * from './auth.response.schema';
 
-@Component({
-  standalone: true,
-  imports: [RouterModule],
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/category.schema.ts
+import { z } from 'zod';
+
+export const CategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+});
+
+export type ICategory = z.infer<typeof CategorySchema>;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/index.ts
+export * from './category.schema';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/index.ts
+export * from './task.schema';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/task.schema.ts
+import { z } from 'zod';
+
+export const TaskSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  title: z.string(),
+  description: z.string().optional(),
+  dueDate: z.date().optional(),
+  completed: z.boolean(),
+  categoryId: z.string().uuid(),
+  userId: z.string().uuid(),
+});
+
+export type ITask = z.infer<typeof TaskSchema>;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/token/index.ts
+export * from './token.schema';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/token/token.schema.ts
+import { TokenType } from '@prisma/client';
+import { z } from 'zod';
+
+export const TokenSchema = z.object({
+  token: z.string(),
+  expires: z.number().int().positive(),
+  type: z.nativeEnum(TokenType),
+});
+
+export const TokensSchema = z.object({
+  access: TokenSchema,
+  refresh: TokenSchema,
+});
+
+export type IToken = z.infer<typeof TokenSchema>;
+export type ITokens = z.infer<typeof TokensSchema>;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/index.ts
+export * from './user.schema';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/user.schema.ts
+import { z } from 'zod';
+
+export const BaseUserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  name: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const RegistrationSchema = BaseUserSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 })
-export class AppComponent {
-  title = 'todo-app';
+  .extend({
+    password: z.string().min(8),
+    passwordConfirmation: z.string().min(8),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Passwords don't match",
+    path: ['passwordConfirmation'],
+  });
+
+export const UpdatePasswordSchema = z
+  .object({
+    oldPassword: z.string(),
+    newPassword: z.string().min(8),
+    newPasswordConfirmation: z.string().min(8),
+  })
+  .refine((data) => data.newPassword === data.newPasswordConfirmation, {
+    message: "New passwords don't match",
+    path: ['newPasswordConfirmation'],
+  });
+
+export type IUser = z.infer<typeof BaseUserSchema>;
+export type IRegistration = z.infer<typeof RegistrationSchema>;
+export type IUpdatePassword = z.infer<typeof UpdatePasswordSchema>;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter, withViewTransitions } from '@angular/router';
-import { appRoutes } from './app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient } from '@angular/common/http';
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideRouter(
-      appRoutes,
-      withViewTransitions({ skipInitialTransition: true })
-    ),
-    provideAnimationsAsync(),
-    provideHttpClient(),
-  ],
-};
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.routes.ts
-import { Route } from '@angular/router';
-import { authGuard } from '@lib/guards';
-
-export const appRoutes: Route[] = [
-  {
-    path: 'auth',
-    loadChildren: async () =>
-      await import('./pages/auth').then((m) => m.routes),
-    canMatch: [authGuard({ requiresAuthentication: false })],
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.lib.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"]
   },
-
-  {
-    path: '',
-    loadChildren: async () =>
-      await import('./pages/dashboard').then((m) => m.routes),
-    canMatch: [authGuard()],
-  },
-];
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
-export * from './navbar/navbar.component';
-export * from './sidenav/sidenav.component';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
-<app-sidenav #drawer [isHandset]="isHandset()">
-  <ng-content />
-</app-sidenav>
-
-<mat-toolbar color="primary">
-  @if ((isHandset())) {
-  <button
-    type="button"
-    aria-label="Toggle sidenav"
-    mat-icon-button
-    (click)="drawer.toggleDrawer()"
-  >
-    <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-  </button>
-  }
-  <span>todo-app</span>
-</mat-toolbar>
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.scss
-.mat-toolbar.mat-primary {
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
-  height: 4rem;
+  "include": ["src/**/*.ts"],
+  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.ts
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.spec.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "module": "commonjs",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "jest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
+
+
+anualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.ts
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -391,52 +423,167 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 export * from './auth/auth.guard';
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/auth/auth.service.ts
-import { AuthResponseSchema } from '@myworkspace/data-models';
-import { inject, Injectable, signal } from '@angular/core';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/interceptors/index.ts
+export * from './jwt.interceptor';
+export * from './server-error.interceptor';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/interceptors/jwt.interceptor.ts
+import { AuthService, TokenService } from '@lib/services';
+import type { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+
+export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const tokenService = inject(TokenService);
+
+  if (authService.isAuthenticated()) {
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${tokenService.accessToken}`,
+      },
+    });
+  }
+
+  return next(req);
+};
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/interceptors/server-error.interceptor.ts
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn,
+  HttpStatusCode,
+} from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { CookieService } from 'ngx-cookie-service';
-import { z } from 'zod';
+import { AuthService, TokenService } from '@lib/services';
+import { catchError, switchMap, throwError, EMPTY } from 'rxjs';
+
+export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
+  const authSvc = inject(AuthService);
+  const tokenSvc = inject(TokenService);
+  const router = inject(Router);
+
+  return next(req).pipe(
+    catchError((error) => {
+      if (
+        error instanceof HttpErrorResponse &&
+        error.status === HttpStatusCode.Unauthorized
+      ) {
+        // Attempt to refresh token
+        if (tokenSvc.refreshToken) {
+          return authSvc.reAuthenticate(tokenSvc.refreshToken).pipe(
+            switchMap((res) => {
+              const { accessToken } = tokenSvc;
+
+              const modifiedReq = req.clone({
+                setHeaders: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              });
+
+              return next(modifiedReq);
+            }),
+            catchError((refreshError) => {
+              authSvc.logout();
+              return throwError(() => refreshError);
+            }),
+          );
+        } else {
+          authSvc.logout();
+          router.navigateByUrl('/auth/login');
+          return EMPTY;
+        }
+      }
+
+      return throwError(() => error);
+    }),
+  );
+};
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/auth.service.ts
+import { IAuthResponse, ITokens } from '@myworkspace/data-models';
+import { inject, Injectable, signal } from '@angular/core';
+
 import { HttpClient } from '@angular/common/http';
+import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private readonly httpClient = inject(HttpClient);
+  private readonly tokenSvc = inject(TokenService);
+
   readonly isAuthenticated = signal<boolean>(false);
 
-  private readonly router = inject(Router);
-  private readonly httpClient = inject(HttpClient);
-  private readonly cookieSvc = inject(CookieService);
+  login(email: string, password: string): Observable<IAuthResponse> {
+    return this.httpClient
+      .post<IAuthResponse>('http://localhost:3000/v1/auth/login', {
+        email,
+        password,
+      })
+      .pipe(
+        switchMap((res: IAuthResponse) => {
+          const { tokens } = res;
 
-  login(email: string, password: string): void {
-    this.httpClient
-      .post<z.infer<typeof AuthResponseSchema>>(
-        'http://localhost:3000/v1/auth/login',
-        { email, password }
-      )
-      .subscribe({
-        next: (res) => {
-          this.cookieSvc.set('accessToken', res.tokens.access.token, {
-            expires: new Date(res.tokens.access.expires),
-            sameSite: 'Strict',
-            secure: true,
-          });
-
-          this.cookieSvc.set('refreshToken', res.tokens.refresh.token, {
-            expires: new Date(res.tokens.refresh.expires),
-            sameSite: 'Strict',
-            secure: true,
-          });
-
+          this.tokenSvc.setTokens(tokens);
           this.isAuthenticated.set(true);
-          this.router.navigate(['/']);
-        },
-        error: (error) => {
-          console.error('Login failed:', error);
-        },
-      });
+          return of(res);
+        }),
+        catchError((error) => {
+          return throwError(() => error);
+        }),
+      );
   }
+
+  reAuthenticate(refreshToken: string): Observable<ITokens> {
+    return this.httpClient
+      .post<ITokens>('http://localhost:3000/v1/auth/refresh-token', {
+        refreshToken,
+      })
+      .pipe(
+        switchMap((res: ITokens) => {
+          this.tokenSvc.setTokens(res);
+          this.isAuthenticated.set(true);
+          return of(res);
+        }),
+        catchError((error) => {
+          this.isAuthenticated.set(false);
+          this.tokenSvc.clear();
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  register(): void {}
+
+  logout(): void {
+    this.tokenSvc.clear();
+    this.isAuthenticated.set(false);
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/index.ts
+export * from './auth.service';
+export * from './token.service';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/token.service.ts
+import { inject, Injectable } from '@angular/core';
+import { ITokens } from '@myworkspace/data-models';
+import { CookieService } from 'ngx-cookie-service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class TokenService {
+  private readonly cookieSvc = inject(CookieService);
 
   get accessToken(): string {
     return this.cookieSvc.get('accessToken');
@@ -446,19 +593,27 @@ export class AuthService {
     return this.cookieSvc.get('refreshToken');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  register(): void {}
+  setTokens(tokens: ITokens): void {
+    this.cookieSvc.set('accessToken', tokens.access.token, {
+      expires: new Date(tokens.access.expires),
+      sameSite: 'Strict',
+      secure: false, // Set to true if using HTTPS
+      path: '/',
+    });
 
-  logout(): void {
+    this.cookieSvc.set('refreshToken', tokens.refresh.token, {
+      expires: new Date(tokens.refresh.expires),
+      sameSite: 'Strict',
+      secure: false, // Set to true if using HTTPS
+      path: '/',
+    });
+  }
+
+  clear(): void {
     this.cookieSvc.delete('accessToken');
     this.cookieSvc.delete('refreshToken');
-    this.isAuthenticated.set(false);
   }
 }
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/index.ts
-export * from './auth/auth.service';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/index.ts
@@ -484,7 +639,7 @@ export const routes: Routes = [
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/login/login.component.html
 <div class="container">
-  <form [formGroup]="loginForm" class="container__form">
+  <form class="container__form" [formGroup]="loginForm" (ngSubmit)="onSignIn()">
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
@@ -497,7 +652,13 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
       <input formControlName="password" type="password" matInput />
     </mat-form-field>
 
-    <button (click)="onSignIn()" color="primary" mat-flat-button type="button">
+    <button
+      [disabled]="loginForm.invalid"
+      (click)="onSignIn()"
+      color="primary"
+      mat-flat-button
+      type="button"
+    >
       Sign In
     </button>
   </form>
@@ -506,9 +667,9 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     <h1>Hello, Friend!</h1>
     <button
       [routerLink]="['/auth', 'register']"
+      type="button"
       color="primary"
       mat-flat-button
-      type="button"
     >
       Sign Up
     </button>
@@ -565,7 +726,7 @@ import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
 import {
   FormControl,
@@ -592,6 +753,8 @@ import {
 })
 export class LoginComponent {
   private readonly authSvc = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   email = new FormControl<string>('', [Validators.required, Validators.email]);
   password = new FormControl<string>('', [Validators.required]);
@@ -607,7 +770,20 @@ export class LoginComponent {
     const email = this.loginForm.value.email ?? '';
     const password = this.loginForm.value.password ?? '';
 
-    this.authSvc.login(email, password);
+    this.authSvc.login(email, password).subscribe({
+      next: (res) => {
+        console.log('done');
+        const url = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.router.navigateByUrl(url);
+      },
+      error: (err) => {
+        console.log('aici');
+        console.error(err);
+      },
+      complete: () => {
+        console.log('complete');
+      },
+    });
   }
 }
 
@@ -724,13 +900,16 @@ export class RegisterComponent {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.html
-<app-navbar [isHandset]="isHandset$ | async"> </app-navbar>
+<app-navbar [isHandset]="isHandset$ | async">
+  <button (click)="testMethod()">test method</button>
+</app-navbar>
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.scss
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.ts
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
@@ -747,14 +926,25 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+  private readonly httpClient = inject(HttpClient);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
       map((result) => result.matches),
-      shareReplay()
+      shareReplay(),
     );
+
+  testMethod() {
+    this.httpClient.post('http://localhost:3000/v1/task/test', {}).subscribe({
+      next: (response) => console.log(response),
+      error: (error) => {
+        console.log('aici');
+      },
+      complete: () => console.info('complete'),
+    });
+  }
 }
 
 
@@ -773,13 +963,6 @@ export const routes: Routes = [
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/assets/.gitkeep
 
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/favicon.ico
-    00     �%  6          �  �%       h  �6  (   0   `           $                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  V/ V/ cV/ �V/ �V/ �V/ �V/ �W0 �Y1 '                                B# pH [�f ��i ��i ��i ��i ��i ��i a�j             �c �^ R�\ ��Y ��U ��R �|N �xK uI &                                    V/ V/ �V/ �V/ �V/ �V/ �V/ �X1 �Y2 L                                d= 9_; �X ��l ��k ��k ��k ��k ��k �k H            �c 8�a �] ��Z ��W ��S �}P �zM �vI                                     V/ V/ �V/ �V/ �V/ �V/ �W0 �Y1 �Z3 L                            oD jA �`; �_= ��c ��l ��k ��k ��k ��k ��k Þk     �j �f ��c ��` ��] ��Y ��V ��R �}O C                                        V/ V/ �V/ �V/ �V/ �V/ �W0 �Z2 �[3 L                            oD [nD �iA �X7 �oI ��j ��k ��k ��k ��k ��k ��k ��m �k s�i ��f ��b ��_ ��[ ��W ��T �yL                                         V/ V/ �V/ �V/ �V/ �V/ �X1 �Z3 �\4 M                        nD oE �qF �oE �f@ �X8 ��Z ��l ��k ��k ��k ��k ��k �k s�k ��k ��h ��d ��a ��] ��Y ˅W                                             V/ V/ �V/ �V/ �V/ �V/ �Y1 �[3 �\4 P                    h= nD �pE �rG �sH �oF �a= �cA ��f ��k ��k ��k ��k ��k ��k ��k ��k ��j ��f ��b ��_ �\ S                                                V/ V/ �V/ �V/ �V/ �W0 �Y2 �[4 �]5 Q                    mC 6oD �qF �sH �uJ �uJ �nF �]; �wO ��k ��k ��k ��k ��k ��k ��k ��k ��k ��h ��d ��` ��\                                         V/ 
-V/ V/ V/ �V/ �V/ �V/ �W0 �Y2 �\4 �]5 Q                kA 
-mC �oD �qF �tH �vJ �xL �vK �kD �^= ��_ ��l ��k ��k ��k ��k ��k ��k ��k ��i ��e ؔb (                                        V/ 	V/ �V/ eV/ V/ �V/ �V/ �V/ �W0 �Z2 �\4 �^6 Q                lA XmC �oE �rG �tI �wK �yM �zN �uK �eA �jF ��h ��k ��k ��k ��k ��k ��k ��k ��j ��g e                                            W0 V/ RV/ �V/ V/ �V/ �V/ �V/ �W0 �Z2 �\4 �^6 Q            j@ kA �mC �pE �rG �uI �wK �yM �|O �{O �rJ �^= �|S ��k ��k ��k ��k ��k ��k ��k ��j ��h                                         �Z]5 iY1 �V/ GV/ V/ �V/ �V/ �V/ �X0 �Z2 �\5 �^6 Q            i? kA �mC �pE �rG �uI �wK �zM �|O �}P �xN �eB �W: ��c ��k ��k ��k ��k ��k ��o���$W                                ��H��H��KHɦ9�f>�X1 �V/ �V/ V/ �V/ �V/ �V/ �X0 �Z2 �\4 �^6 Q        g> 4i? �kA �mC �pE �rG �uI �wK �zM �|O �|P �vM �b@ �bA ��g ��k ��k ��k ��k ��k ��s	�ӵ]����                        ��H-��H���J���G���*�`8�Y1 �V/ �V/ V/ �V/ �V/ �V/ �W0 �Z2 �\4 �^6 Q    d; 	f= �h? �kA �mC �pE �rG �tI �wK �yM �{O �yN �mF �^> ��] ��l ��k ��k ��k ��k ��k ��l �ͫH��ڔ��ٛ�ؖ�ؖ�ؖ.�ؘr�֏���O�߾D���/��h�i@�]5 �Y1 �V/ �V/ V/ �V/ �V/ �V/ �W0 �Z2 �\4 �^5 Q    d; Uf< �h> �j@ �mC �oE �rG �tH �wK �yL �xM �qI �_= �vO ��k ��k ��k ��k ��k ��k ��k ��j ������i��א��ؗ��ؘ��ؗ��֏���k���G��w�mC�e; �a8 �]5 �X1 �V/ ]V/ V/ �V/ �V/ �V/ �W0 �Y2 �\4 �]5 Pb: c: �e< �h> �j@ �lB �oD �qF �rG DwK }wK �sI �d@ �cA ��f ��k ��k ��k ��k ��k ��k ��k ��k ��i���$���W���p���v���n���Y���I���*�rG�j@ �f< �a8 �\4 �X1 �V/  V/ V/ �V/ �V/ �V/ �W0 �Y1 �[3 �\5 Qa8 wb: �e< �g> �i@ �lB �nD �pE �oC uI }sH �iB �Z: ��Z ��l ��k ��k ��k ��k ��k ��k ��k ��j ��f ��e����Ω4�ܹA�޼B�״=���(�}R�nC �j@ �e< �`8 �[4 �X1 �    V/ V/ �V/ �V/ �V/ �V/ �X1 �[3 �]5 �`7 �b9 �d; �f= �i? �kA �mC �oD *    qG }kD �Z9 �oI ��j ��k ��k ��k ��k ��k ��k �k ��k ��i ��e ��a ��] ��_��g��g��[�xK�rF �nC �i? �d; �_7 �[3 �X1     V/ V/ �V/ �V/ �V/ �V/ �X0 �Z2 �\4 �_6 �a8 �c: �f< �h> �j@ �lB q        jB }_< �\; ��c ��l ��k ��k ��k ��k ��k ۞k C�k ��j ��g ��c ��` ��\ ��X ��S �}O �yL �uI �qE �lA �g> �c: �^6 �[3 J        V/ V/ �V/ �V/ �V/ �V/ �W0 �Y2 �\4 �^6 �`8 �b: �e; �g= �i? �kA         `; }U6 �U ��l ��k ��k ��k ��k ��k ��k l    �k $�h ��d ��a ��^ ��Z ��V ��S �}O �xK �tH �oD �j@ �f< �a9 �^6 ZS,         V/ V/ �V/ �V/ �V/ �V/ �V/ �X1 �[3 �]5 �_7 �a9 �d; �f< �g> M            T4 ~kE ��i ��k ��k ��k ��k ��k ��k ��k         �e �b ��_ �[ ��X ��T �Q �zM �vJ �rF �mB �i? �e; �a8 BW0             V/ V/ �V/ �V/ �V/ �V/ �V/ �W0 �Z2 �\4 �^6 �`8 �b: �d; �g=             iC ~�a ��k ��k ��k ��k ��k ��k �k :                �` �] @�Y ��V ڀR �|O �xK �tH �pD �lA �h> he;                     V/ V/ �V/ �V/ �V/ �V/ �V/ �W0 �Y1 �[3 �]5 �_7 �a8 �c: .                xL ~Q ��R ��S ��T ��T ��U ��W ��o                         �W �T Q ={M TwJ YsG JoD +kA                             V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �X0 �Z2 �\4 �^6 �`7 w                    kA }lB �nC �oD �pF �rG �sH �sH �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �W/ �X1 �Z3 �\4 �^6                     j@ }kA �lB �nC �oD �pE �qF �rG �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �W0 �Y2 �[3 R                        h> }i? �j@ �lB �mC �nC �oD �pE �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �W0 �Z2                         f= }g= �h? �j@ �kA �lB �mB �mC �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ 2                            d; }e< �f= �g> �i? �j@ �j@ �kA �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ ~                                b9 }c: �d; �e< �f= �g> �h> �i? �                                                                                        V/ V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/ �V/                                 `7 }a8 �b9 �c: �d; �e< �f< �f= �                                                                                        V/ V/ TV/ pV/ nV/ nV/ nV/ nV/ oV/ :                                    _6 6`7 oa8 nb9 nc: nd; nd; pe; C                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ������  ������  ������  ������  ������  ������  ������  ������  ������  ������  ������  ����  ���>�  ����  ����  �� �  ��  �  ��  �  ��  ?�  ��  �  ��  �  ��  ��  ��  �  ��  >   ��     ��`    ��`    � �    ��   ��   ��   ��?�  ��?��  ��?��  ��?��  ��?��  ��?��  �?�?��  ��?��  ��?��  ������  ������  ������  ������  ������  ������  ������  ������  (       @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             V/ V/ XV/ \V/ \V/ ]X1 /                    L, ~S I�i `�i _�i _�i [�i         �_ �\ V�X \�S \{N ^wJ ,                        V/ KV/ �V/ �V/ �W0 �Y1 �                    d= BgA �b ��k ��k ��k ��k ��k �s �c ��_ ��Z ��U �}P �xL 6                        V/ KV/ �V/ �V/ �X1 �Z3 �                pE mC �b= �pJ ��j ��k ��k ��k �k J�k A�g �c ��] ��X ��T y                            V/ KV/ �V/ �V/ �Y1 �[3 �                oD fqF �nE �`= ��Y ��l ��k ��k ��k Ϟk ˝j ��f ��` ��[ ��V                             V/ KV/ �V/ �W/ �Z2 �\4 �            mC #oD �rG �uI �lE �hD ��e ��k ��k ��k ��k ��k ��h ��c �^ F                        V/ V/ V/ KV/ �V/ �W0 �Z3 �]5 �        h> mC �pE �sH �wK �wL �hC �yP ��k ��k ��k ��k ��k ��i ��e ��[                         V/ *V/ zV/ KV/ �V/ �W0 �[3 �]5 �        kA @mB �pE �tI �xL �{N �wL �fC ��] ��l ��k ��k ��k ��j ͚g                         �w 	]5\W0 oV/ KV/ �V/ �W0 �[3 �]5 �    g> j@ �mB �qF �tI �xL �|O �|P �hC �mI ��k ��k ��k ��l����                ��F��J ��NIĢ6�d<�V/ �V/ KV/ �V/ �W0 �[3 �]5 �    g= ci? �mB �pE �tH �xL �{N �wM �eB ��[ ��k ��k ��k ��j ���3��ڑU�ݩ�ڜ�ٜF��uk߾Dҽ�1��c�]5 �W0 �V/ KV/ �V/ �W0 �Z3 �]5 �d; e< �i? �lB �pE �sH �wK �wL �hC �vN ��j ��k ��k ��k ��j ��z�ܿ^��ֈ��׍��Ԃ���Z���!�mC�a8 �[4 �W0 �V/ KV/ �V/ �W/ �Z2 �\4 �b9 �d; �h> �kA �oD �qF BuJ �mE �fB ��d ��k ��k ��k ��k ��k ��g ��{�Ϊ=�ܽM�ٸD���'�uJ�h> �b9 �[3 �W0 6V/ KV/ �V/ �V/ �Y1 �\4 �`8 �c: �g= �j@ �mC �zK lD �_< ��W ��l ��k ��k ��k ��k ؝j ��f ��_ ��_��e
-��]	�wK�nC �g= �`7 �[3 L' V/ KV/ �V/ �V/ �X1 �[3 �_6 �b9 �e< �h? �kA %    \9 �mG ��i ��k ��k ��k ��k e�k 9�g Քb ��] ��W �Q �yL �sG �lA �e< �`7 �[3     V/ KV/ �V/ �V/ �W0 �Z2 �]5 �a8 �d; �f= j       eA ��a ��l ��l ��k ��k ��k     �d .�_ ��Z �U �}O �vJ �pE �j? �d; v_7         V/ KV/ �V/ �V/ �V/ �X1 �\4 �_7 �b9 �e;        |P ��Y ��Z ��[ ��\ �a A            �\ �W 7�R nzM �tH �nC \i? !a9             V/ KV/ �V/ �V/ �V/ �W0 �Z2 �]5 �_7 G        j? lA �mC �oD �qF �sG �sH +                                                        V/ KV/ �V/ �V/ �V/ �V/ �X1 �[3 �`7         b8 i? �j@ �mB �nD �pE �pE +                                                        V/ KV/ �V/ �V/ �V/ �V/ �V/ �X1 )            _6 f= �g> �i@ �kA �lB �mC +                                                        V/ LV/ �V/ �V/ �V/ �V/ �V/ q                ]4 c: �d; �f= �h> �i? �i? +                                                        V/ @V/ �V/ �V/ �V/ �V/ �V/                 [2 `8 �b9 �c: �e; �f< �f= $                                                        V/ V/ V/ V/ V/ V/                         _6 `7 a9 c: d; d;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ����������������������������������0��0��� ����������� �� ��   � � �00�p8�p?�����������������������������������(                                                                                                                                                                                                                                    V/ 'V/ ;W0 *Z3     ^: �] 2�k =�j %    �] #�V <{N (j?         V/ �V/ �X1 �\4     h@ LvM �i ��k ʞk A�c ƉY �Q a            V/ �V/ �Z2 �[4 nC qF �lE ��Z ��l ��k �h ��` ��V         V/ 	V/ �W0 �[3 �[4 mC rrG �wK �tL ��e ��k ��j�d8        ��(\5VV/ �W0 �[3 �f= 1kA �rG �zM �qI ��^ ��k ��z���z0��#��R^�}#�b:�V/ �W0 �Z3 �d; �j@ �qF �qH �zP ��j ��k ��r�ƤB�ڽ]㫆*�lC�[3 �V/ �V/ �Z2 �a8 �g> �jA GlF c ��l ��k ��e �a��^�sH�c: �[4 7V/ �V/ �X1 �^6 �c: �^: �T Œa ��d ��n �` @�V �xK �mB �d; -    V/ �V/ �V/ �Z2 �_6  mB 
-mC �pE �sG �        yL tH lA         V/ �V/ �V/ �W/ d    c: e< �h? �j@ �                            V/ RV/ |V/ hV/     _7 a9 ^d; }f< A                                                                                                                                                            ��  ��  ��  ��  O              c      ��  ��  ��  
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/index.html
 <!DOCTYPE html>
@@ -1525,6 +1708,12 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   return res.status(httpStatus.OK).json({ user, tokens });
 });
 
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const tokens = await authService.refreshAuth(req.body.refreshToken);
+
+  return res.status(httpStatus.OK).json(tokens);
+});
+
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/index.ts
 export * as authController from './auth.controller';
@@ -1535,8 +1724,12 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/c
 import { Request, Response } from 'express';
 
 export const test = (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Hello API' });
+  res.status(404).json({ message: 'Not Found' });
 };
+
+// export const hello = (req: Request, res: Response) => {
+//   res.status(200).json({ message: 'Hello API' });
+// };
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/main.ts
@@ -1707,6 +1900,8 @@ router.post('/register', auth(), authController.register);
 
 router.post('/login', authController.login);
 
+router.post('/refresh-token', authController.refreshToken);
+
 export default router;
 
 
@@ -1749,21 +1944,18 @@ export default router;
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/auth.service.ts
-import z from 'zod';
-import { BaseUserSchema } from '@myworkspace/data-models';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
 import httpStatus from 'http-status';
 import { exclude } from '../utils/exclude';
-
-export const generateAuthToken = (user: z.infer<typeof BaseUserSchema>) => {
-  return user.id;
-};
+import { tokenService } from '.';
+import { TokenType } from '@prisma/client';
+import { ITokens } from 'shared/data-models/src/lib/token';
 
 export const loginUserWithEmailAndPassword = async (
   email: string,
-  password: string
+  password: string,
 ) => {
   const user = await prisma.user.findUnique({
     where: {
@@ -1781,6 +1973,27 @@ export const loginUserWithEmailAndPassword = async (
   return exclude(user, ['password']);
 };
 
+export const refreshAuth = async (refreshToken: string): Promise<ITokens> => {
+  try {
+    const refreshTokenData = await tokenService.verifyToken(
+      refreshToken,
+      TokenType.REFRESH,
+    );
+
+    const { userId } = refreshTokenData;
+
+    await prisma.token.delete({
+      where: {
+        id: refreshTokenData.id,
+      },
+    });
+
+    return tokenService.generateAuthTokens({ id: userId });
+  } catch (error) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please Authenticate');
+  }
+};
+
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/index.ts
 export * as authService from './auth.service';
@@ -1794,14 +2007,22 @@ import z from 'zod';
 import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
+import prisma from '../client.js';
+
+interface JwtPayload {
+  sub: string;
+  iat: number;
+  exp: number;
+  type: TokenType;
+}
 
 const generateToken = (
   userId: string,
   expires: Date,
   type: TokenType,
-  secret = config.jwt.secret
+  secret = config.jwt.secret,
 ): string => {
-  const payload = {
+  const payload: JwtPayload = {
     sub: userId,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(expires.getTime() / 1000),
@@ -1810,8 +2031,48 @@ const generateToken = (
   return jwt.sign(payload, secret);
 };
 
+const saveToken = async (
+  userId: string,
+  token: string,
+  expires: Date,
+  type: TokenType,
+  blacklisted = false,
+) => {
+  const existingToken = await prisma.token.findFirst({
+    where: {
+      userId,
+      type,
+    },
+  });
+
+  if (existingToken) {
+    await prisma.token.update({
+      where: {
+        id: existingToken.id,
+      },
+      data: {
+        token,
+        expires,
+        blacklisted,
+      },
+    });
+
+    return existingToken;
+  }
+
+  return await prisma.token.create({
+    data: {
+      userId,
+      token,
+      expires,
+      type,
+      blacklisted,
+    },
+  });
+};
+
 export const generateAuthTokens = async (
-  user: z.infer<typeof BaseUserSchema>
+  user: z.infer<typeof BaseUserSchema>,
 ) => {
   const { id } = user;
 
@@ -1820,7 +2081,7 @@ export const generateAuthTokens = async (
   const accessToken = generateToken(
     id,
     new Date(accesTokenExpires),
-    TokenType.ACCESS
+    TokenType.ACCESS,
   );
 
   const refreshTokenExpires =
@@ -1828,7 +2089,14 @@ export const generateAuthTokens = async (
   const refreshToken = generateToken(
     id,
     new Date(refreshTokenExpires),
-    TokenType.REFRESH
+    TokenType.REFRESH,
+  );
+
+  await saveToken(
+    id,
+    refreshToken,
+    new Date(refreshTokenExpires),
+    TokenType.REFRESH,
   );
 
   return {
@@ -1841,6 +2109,27 @@ export const generateAuthTokens = async (
       expires: refreshTokenExpires,
     },
   };
+};
+
+export const verifyToken = async (token: string, type: TokenType) => {
+  const payload = jwt.verify(token, config.jwt.secret) as JwtPayload;
+
+  const userId = payload.sub;
+
+  if (payload.type !== type) throw new Error('Invalid token type');
+
+  const tokenData = await prisma.token.findFirst({
+    where: {
+      userId,
+      token,
+      type,
+      blacklisted: false,
+    },
+  });
+
+  if (!tokenData) throw new Error('Token not found!');
+
+  return tokenData;
 };
 
 

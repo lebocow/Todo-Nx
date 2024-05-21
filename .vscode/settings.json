@@ -1,3 +1,11 @@
 {
-  "CodeGPT.apiKey": "Google AI Studio"
+  "CodeGPT.apiKey": "Google AI Studio",
+  "angular-schematics.schematicsDefaultOptions": {
+    "angular-component": {
+      "ngOnInit": true
+    },
+    "angular-page": {
+      "skipNgOnInit": false
+    }
+  }
 }

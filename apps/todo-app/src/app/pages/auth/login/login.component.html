@@ -1,5 +1,5 @@
 <div class="container">
-  <form [formGroup]="loginForm" class="container__form">
+  <form class="container__form" [formGroup]="loginForm" (ngSubmit)="onSignIn()">
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
@@ -12,7 +12,13 @@
       <input formControlName="password" type="password" matInput />
     </mat-form-field>
 
-    <button (click)="onSignIn()" color="primary" mat-flat-button type="button">
+    <button
+      [disabled]="loginForm.invalid"
+      (click)="onSignIn()"
+      color="primary"
+      mat-flat-button
+      type="button"
+    >
       Sign In
     </button>
   </form>
@@ -21,9 +27,9 @@
     <h1>Hello, Friend!</h1>
     <button
       [routerLink]="['/auth', 'register']"
+      type="button"
       color="primary"
       mat-flat-button
-      type="button"
     >
       Sign Up
     </button>

@@ -11,3 +11,5 @@ export const TaskSchema = z.object({
   categoryId: z.string().uuid(),
   userId: z.string().uuid(),
 });
+
+export type ITask = z.infer<typeof TaskSchema>;
