@@ -5,7 +5,6 @@ import httpStatus from 'http-status';
 import { exclude } from '../utils/exclude';
 import { tokenService } from '.';
 import { TokenType } from '@prisma/client';
-import { ITokens } from 'shared/data-models/src/lib/token';
 
 export const loginUserWithEmailAndPassword = async (
   email: string,
@@ -24,10 +23,10 @@ export const loginUserWithEmailAndPassword = async (
   if (!isPasswordValid)
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid password');
 
-  return exclude(user, ['password']);
+  return exclude(user, ['password', 'createdAt', 'updatedAt']);
 };
 
-export const refreshAuth = async (refreshToken: string): Promise<ITokens> => {
+export const refreshAuth = async (refreshToken: string) => {
   try {
     const refreshTokenData = await tokenService.verifyToken(
       refreshToken,

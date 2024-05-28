@@ -10,7 +10,7 @@ export const errorConverter: ErrorRequestHandler = (
   err: PrismaClientKnownRequestError | ZodError | ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   let error = err;
 
@@ -35,7 +35,7 @@ export const errorHandler: ErrorRequestHandler = (
   err: ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { statusCode, message, errors } = err;
 

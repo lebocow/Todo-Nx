@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ITokens } from '@myworkspace/data-models';
+import { TokenType } from '@prisma/client';
 import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
@@ -17,19 +18,35 @@ export class TokenService {
   }
 
   setTokens(tokens: ITokens): void {
-    this.cookieSvc.set('accessToken', tokens.access.token, {
-      expires: new Date(tokens.access.expires),
-      sameSite: 'Strict',
-      secure: false, // Set to true if using HTTPS
-      path: '/',
-    });
+    this.setToken(tokens.access.token, TokenType.ACCESS, tokens.access.expires);
 
-    this.cookieSvc.set('refreshToken', tokens.refresh.token, {
-      expires: new Date(tokens.refresh.expires),
+    this.setToken(
+      tokens.refresh.token,
+      TokenType.REFRESH,
+      tokens.refresh.expires,
+    );
+  }
+
+  setToken(token: string, type: TokenType, expires: number) {
+    const cookieName = this.getCookieName(type);
+
+    this.cookieSvc.set(cookieName, token, {
+      expires: new Date(expires),
       sameSite: 'Strict',
       secure: false, // Set to true if using HTTPS
       path: '/',
     });
+  }
+
+  private getCookieName(type: TokenType): string {
+    switch (type) {
+      case TokenType.ACCESS:
+        return 'accessToken';
+      case TokenType.REFRESH:
+        return 'refreshToken';
+      default:
+        throw new Error('Invalid token type');
+    }
   }
 
   clear(): void {

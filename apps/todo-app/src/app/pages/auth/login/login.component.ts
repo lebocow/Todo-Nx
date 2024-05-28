@@ -41,7 +41,7 @@ export class LoginComponent {
     password: this.password,
   });
 
-  onSignIn() {
+  onSignIn(): void {
     if (this.loginForm.invalid) return;
 
     const email = this.loginForm.value.email ?? '';

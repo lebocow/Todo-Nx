@@ -1,31 +1,41 @@
-import { IAuthResponse, ITokens } from '@myworkspace/data-models';
+import { IAuthResponse } from '@myworkspace/data-models';
 import { inject, Injectable, signal } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
+import { IApiResponse } from '@lib/interfaces';
+import { TokenType } from '@prisma/client';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly httpClient = inject(HttpClient);
+  private readonly router = inject(Router);
 
   private readonly tokenSvc = inject(TokenService);
   private readonly userSvc = inject(UserService);
 
   readonly isAuthenticated = signal<boolean>(false);
 
-  login(email: string, password: string): Observable<IAuthResponse> {
+  login(
+    email: string,
+    password: string,
+  ): Observable<IApiResponse<IAuthResponse>> {
     return this.httpClient
-      .post<IAuthResponse>('http://localhost:3000/v1/auth/login', {
-        email,
-        password,
-      })
+      .post<IApiResponse<IAuthResponse>>(
+        'http://localhost:3000/v1/auth/login',
+        {
+          email,
+          password,
+        },
+      )
       .pipe(
-        switchMap((res: IAuthResponse) => {
-          const { tokens, user } = res;
+        switchMap((res: IApiResponse<IAuthResponse>) => {
+          const { tokens, user } = res.data;
 
           this.userSvc.user.set(user);
           this.tokenSvc.setTokens(tokens);
@@ -38,21 +48,38 @@ export class AuthService {
       );
   }
 
-  reAuthenticate(refreshToken: string): Observable<ITokens> {
+  refreshToken(): Observable<boolean> {
+    const { refreshToken } = this.tokenSvc;
+
+    if (!refreshToken) {
+      this.clearSession();
+      return of(false);
+    }
+
     return this.httpClient
-      .post<ITokens>('http://localhost:3000/v1/auth/refresh-token', {
+      .post<IApiResponse<any>>('http://localhost:3000/v1/auth/refresh-token', {
         refreshToken,
       })
       .pipe(
-        switchMap((res: ITokens) => {
-          this.tokenSvc.setTokens(res);
-          this.isAuthenticated.set(true);
-          return of(res);
+        switchMap((res: IApiResponse<any>) => {
+          if (res.data.user) {
+            this.isAuthenticated.set(true);
+            this.userSvc.user.set(res.data.user);
+            this.tokenSvc.setToken(
+              res.data.accessToken.token,
+              TokenType.ACCESS,
+              res.data.accessToken.expires,
+            );
+
+            return of(true);
+          }
+
+          this.clearSession();
+          return of(false);
         }),
-        catchError((error) => {
-          this.isAuthenticated.set(false);
-          this.tokenSvc.clear();
-          return throwError(() => error);
+        catchError((error: HttpErrorResponse) => {
+          this.clearSession();
+          return of(false);
         }),
       );
   }
@@ -61,7 +88,13 @@ export class AuthService {
   register(): void {}
 
   logout(): void {
+    this.clearSession();
+    this.router.navigateByUrl('/auth/login');
+  }
+
+  private clearSession(): void {
     this.tokenSvc.clear();
     this.isAuthenticated.set(false);
+    this.userSvc.user.set(null);
   }
 }

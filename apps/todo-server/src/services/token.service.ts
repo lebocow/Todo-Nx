@@ -1,9 +1,10 @@
-import { BaseUserSchema } from '@myworkspace/data-models';
+import { BaseUserSchema, ITokens } from '@myworkspace/data-models';
 import z from 'zod';
 import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import prisma from '../client.js';
+import { access } from 'fs';
 
 interface JwtPayload {
   sub: string;
@@ -67,29 +68,43 @@ const saveToken = async (
   });
 };
 
-export const generateAuthTokens = async (
+export const generateAccessToken = async (
   user: z.infer<typeof BaseUserSchema>,
 ) => {
-  const { id } = user;
+  const { id: userId } = user;
 
-  const accesTokenExpires =
+  const expires = Date.now() + config.jwt.accessExpirationMinutes * 60 * 1000;
+
+  const token = generateToken(userId, new Date(expires), TokenType.ACCESS);
+
+  return { token, expires, type: TokenType.ACCESS };
+};
+
+export const generateAuthTokens = async (
+  user: z.infer<typeof BaseUserSchema>,
+): Promise<ITokens> => {
+  const { id: userId } = user;
+
+  const accessTokenExpires =
     Date.now() + config.jwt.accessExpirationMinutes * 60 * 1000;
-  const accessToken = generateToken(
-    id,
-    new Date(accesTokenExpires),
-    TokenType.ACCESS,
-  );
 
   const refreshTokenExpires =
     Date.now() + config.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000;
+
+  const accessToken = generateToken(
+    userId,
+    new Date(accessTokenExpires),
+    TokenType.ACCESS,
+  );
+
   const refreshToken = generateToken(
-    id,
+    userId,
     new Date(refreshTokenExpires),
     TokenType.REFRESH,
   );
 
   await saveToken(
-    id,
+    userId,
     refreshToken,
     new Date(refreshTokenExpires),
     TokenType.REFRESH,
@@ -98,11 +113,13 @@ export const generateAuthTokens = async (
   return {
     access: {
       token: accessToken,
-      expires: accesTokenExpires,
+      expires: accessTokenExpires,
+      type: TokenType.ACCESS,
     },
     refresh: {
       token: refreshToken,
       expires: refreshTokenExpires,
+      type: TokenType.REFRESH,
     },
   };
 };
