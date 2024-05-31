@@ -1,12 +1,23 @@
 .sidenav-container {
   height: 100vh;
-}
 
-.sidenav {
-  width: 200px;
-  height: calc(100vh - 4rem);
-}
+  .sidenav {
+    width: 200px;
+    height: calc(100vh - 4rem);
 
-.sidenav .mat-toolbar {
-  background: inherit;
+    .mat-toolbar {
+      background: inherit;
+    }
+
+    .active-link {
+      background: rgba(var(--secondary-color), 0.8);
+    }
+
+    &::ng-deep.mdc-list-item__primary-text {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.1rem;
+    }
+  }
 }

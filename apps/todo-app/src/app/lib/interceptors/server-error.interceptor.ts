@@ -5,14 +5,13 @@ import {
   HttpStatusCode,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+
 import { AuthService, TokenService } from '@lib/services';
 import { catchError, switchMap, throwError, EMPTY } from 'rxjs';
 
 export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const authSvc = inject(AuthService);
   const tokenSvc = inject(TokenService);
-  const router = inject(Router);
 
   const handleUnauthorizedError = (req: HttpRequest<unknown>) => {
     if (tokenSvc.refreshToken) {
@@ -47,11 +46,20 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       switch (error.status) {
-        case HttpStatusCode.InternalServerError:
-          return throwError(() => error);
+        case HttpStatusCode.Forbidden:
+          authSvc.logout();
+          return EMPTY;
 
         case HttpStatusCode.Unauthorized:
           return handleUnauthorizedError(req);
+
+        case 0:
+          return throwError(
+            () =>
+              new Error(
+                'No internet connection. Please check your network and try again.',
+              ),
+          );
 
         default:
           return throwError(() => error);

@@ -10,13 +10,4 @@ import { AuthService, TokenService } from '@lib/services';
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  private readonly authSvc = inject(AuthService);
-  private readonly tokenSvc = inject(TokenService);
-
-  constructor() {
-    // if (this.tokenSvc.refreshToken && !this.tokenSvc.accessToken) {
-    //   this.authSvc.refreshToken().subscribe();
-    // }
-  }
-}
+export class AppComponent {}

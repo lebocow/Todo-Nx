@@ -4,7 +4,6 @@ import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import prisma from '../client.js';
-import { access } from 'fs';
 
 interface JwtPayload {
   sub: string;

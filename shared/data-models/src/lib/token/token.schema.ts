@@ -1,5 +1,6 @@
 import { TokenType } from '@prisma/client';
 import { z } from 'zod';
+import { BaseUserSchema } from '../user';
 
 export const TokenSchema = z.object({
   token: z.string(),

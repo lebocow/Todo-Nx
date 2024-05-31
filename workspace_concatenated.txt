@@ -1,289 +1,263 @@
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/.eslintrc.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/.eslintrc.json
 {
   "extends": ["../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
-      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.js", "*.jsx"],
-      "rules": {}
-    },
-    {
-      "files": ["*.json"],
-      "parser": "jsonc-eslint-parser",
+      "files": ["*.ts"],
+      "extends": [
+        "plugin:@nx/angular",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
       "rules": {
-        "@nx/dependency-checks": [
+        "@angular-eslint/directive-selector": [
           "error",
           {
-            "ignoredFiles": ["{projectRoot}/esbuild.config.{js,ts,mjs,mts}"]
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
           }
         ]
       }
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@nx/angular-template"],
+      "rules": {}
     }
   ]
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/jest.config.ts
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/jest.config.ts
 /* eslint-disable */
 export default {
-  displayName: 'data-models',
+  displayName: 'todo-app',
   preset: '../../jest.preset.js',
-  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  coverageDirectory: '../../coverage/apps/todo-app',
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    '^.+\\.(ts|mjs|js|html)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.(html|svg)$',
+      },
+    ],
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/shared/data-models',
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  snapshotSerializers: [
+    'jest-preset-angular/build/serializers/no-ng-attributes',
+    'jest-preset-angular/build/serializers/ng-snapshot',
+    'jest-preset-angular/build/serializers/html-comment',
+  ],
 };
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/package.json
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/project.json
 {
-  "name": "@myworkspace/data-models",
-  "version": "0.0.1",
-  "dependencies": {},
-  "type": "commonjs",
-  "main": "./index.cjs",
-  "private": true
-}
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/project.json
-{
-  "name": "data-models",
+  "name": "todo-app",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "shared/data-models/src",
-  "projectType": "library",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/todo-app/src",
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/esbuild:esbuild",
+      "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/shared/data-models",
-        "main": "shared/data-models/src/index.ts",
-        "tsConfig": "shared/data-models/tsconfig.lib.json",
-        "assets": [],
-        "format": ["cjs"]
+        "outputPath": "dist/apps/todo-app",
+        "index": "apps/todo-app/src/index.html",
+        "browser": "apps/todo-app/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/todo-app/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": ["apps/todo-app/src/favicon.ico", "apps/todo-app/src/assets"],
+        "styles": [
+          "apps/todo-app/src/styles.scss",
+          "node_modules/ngx-toastr/toastr.css"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "todo-app:build:production"
+        },
+        "development": {
+          "buildTarget": "todo-app:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "apps/todo-app/proxy.conf.json"
       }
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "todo-app:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "shared/data-models/jest.config.ts"
+        "jestConfig": "apps/todo-app/jest.config.ts"
       }
     }
   }
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/index.ts
-export * from './lib/auth';
-export * from './lib/category';
-export * from './lib/task';
-export * from './lib/user';
-export * from './lib/token';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/proxy.conf.json
+{
+  "/api": {
+    "target": "http://localhost:3000",
+    "secure": false
+  }
+}
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/auth.response.schema.ts
-import { z } from 'zod';
-import { BaseUserSchema } from '../user';
-import { TokensSchema } from '../token';
-
-export const AuthResponseSchema = z.object({
-  user: BaseUserSchema,
-  tokens: TokensSchema,
-});
-
-export type IAuthResponse = z.infer<typeof AuthResponseSchema>;
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.html
+<router-outlet></router-outlet>
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/auth.schema.ts
-import { z } from 'zod';
-
-export const LoginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-export type ILoginInput = z.infer<typeof LoginSchema>;
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.scss
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/auth/index.ts
-export * from './auth.schema';
-export * from './auth.response.schema';
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.ts
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { AuthService, TokenService } from '@lib/services';
 
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/category.schema.ts
-import { z } from 'zod';
-
-export const CategorySchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-});
-
-export type ICategory = z.infer<typeof CategorySchema>;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/category/index.ts
-export * from './category.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/index.ts
-export * from './task.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/task/task.schema.ts
-import { z } from 'zod';
-
-export const TaskSchema = z.object({
-  id: z.string().uuid(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  title: z.string(),
-  description: z.string().optional(),
-  dueDate: z.date().optional(),
-  completed: z.boolean(),
-  categoryId: z.string().uuid(),
-  userId: z.string().uuid(),
-});
-
-export type ITask = z.infer<typeof TaskSchema>;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/token/index.ts
-export * from './token.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/token/token.schema.ts
-import { TokenType } from '@prisma/client';
-import { z } from 'zod';
-
-export const TokenSchema = z.object({
-  token: z.string(),
-  expires: z.number().int().positive(),
-  type: z.nativeEnum(TokenType),
-});
-
-export const TokensSchema = z.object({
-  access: TokenSchema,
-  refresh: TokenSchema,
-});
-
-export type IToken = z.infer<typeof TokenSchema>;
-export type ITokens = z.infer<typeof TokensSchema>;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/index.ts
-export * from './user.schema';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/src/lib/user/user.schema.ts
-import { z } from 'zod';
-
-export const BaseUserSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export const RegistrationSchema = BaseUserSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+@Component({
+  standalone: true,
+  imports: [RouterModule],
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-  .extend({
-    password: z.string().min(8),
-    passwordConfirmation: z.string().min(8),
-  })
-  .refine((data) => data.password === data.passwordConfirmation, {
-    message: "Passwords don't match",
-    path: ['passwordConfirmation'],
-  });
-
-export const UpdatePasswordSchema = z
-  .object({
-    oldPassword: z.string(),
-    newPassword: z.string().min(8),
-    newPasswordConfirmation: z.string().min(8),
-  })
-  .refine((data) => data.newPassword === data.newPasswordConfirmation, {
-    message: "New passwords don't match",
-    path: ['newPasswordConfirmation'],
-  });
-
-export type IUser = z.infer<typeof BaseUserSchema>;
-export type IRegistration = z.infer<typeof RegistrationSchema>;
-export type IUpdatePassword = z.infer<typeof UpdatePasswordSchema>;
+export class AppComponent {}
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter, withViewTransitions } from '@angular/router';
+import { appRoutes } from './app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { jwtInterceptor, serverErrorInterceptor } from '@lib/interceptors';
+import { provideToastr } from 'ngx-toastr';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(
+      appRoutes,
+      withViewTransitions({ skipInitialTransition: true }),
+    ),
+    provideAnimationsAsync(),
+    provideHttpClient(
+      withInterceptors([jwtInterceptor, serverErrorInterceptor]),
+    ),
+    provideToastr(),
+  ],
+};
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.routes.ts
+import { Route } from '@angular/router';
+import { authGuard } from '@lib/guards';
+
+export const appRoutes: Route[] = [
+  {
+    path: 'auth',
+    loadChildren: async () => await import('@pages/auth').then((m) => m.routes),
+    canMatch: [authGuard({ requiresAuthentication: false })],
   },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+
+  {
+    path: '',
+    loadChildren: async () =>
+      await import('@pages/dashboard').then((m) => m.routes),
+    canMatch: [authGuard()],
+  },
+];
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
+export * from './navbar/navbar.component';
+export * from './sidenav/sidenav.component';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
+<app-sidenav #drawer [isHandset]="isHandset()">
+  <ng-content />
+</app-sidenav>
+
+<mat-toolbar color="primary">
+  @if (isHandset()) {
+    <button
+      (click)="drawer.toggleDrawer()"
+      type="button"
+      aria-label="Toggle sidenav"
+      mat-icon-button
+    >
+      <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+    </button>
+  }
+  <span>todo-app</span>
+</mat-toolbar>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.scss
+.mat-toolbar.mat-primary {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  height: 4rem;
 }
 
 
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.lib.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "declaration": true,
-    "types": ["node"]
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"]
-}
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/shared/data-models/tsconfig.spec.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"]
-  },
-  "include": [
-    "jest.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
-}
-
-
-ib/components/navbar/navbar.component.ts
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.ts
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -319,18 +293,51 @@ export class NavbarComponent {
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/sidenav/sidenav.component.html
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
-    #drawer
-    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
-    [mode]="isHandset() ? 'over' : 'side'"
-    [opened]="!isHandset()"
     class="sidenav"
+    #drawer
+    [mode]="isHandset() ? 'over' : 'side'"
+    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
+    [opened]="isSideNavOpen() || !isHandset()"
     fixedInViewport
   >
     <mat-toolbar>Menu</mat-toolbar>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/">Recent</a>
-      <a mat-list-item routerLink="/">Done</a>
-      <a mat-list-item routerLink="/">Inbox</a>
+    <mat-nav-list class="sidenav-list">
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        mat-list-item
+        color="primary"
+        routerLinkActive="active-link"
+        routerLink="/"
+      >
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="calendar_today"
+        />
+        <span>Recent</span>
+      </a>
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        mat-list-item
+        routerLinkActive="active-link"
+        routerLink="/done"
+        ><mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="event_available"
+        />Done</a
+      >
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active-link"
+        routerLink="/inbox"
+        mat-list-item
+        ><mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="inbox"
+        />Inbox</a
+      >
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -342,15 +349,26 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/sidenav/sidenav.component.scss
 .sidenav-container {
   height: 100vh;
-}
 
-.sidenav {
-  width: 200px;
-  height: calc(100vh - 4rem);
-}
+  .sidenav {
+    width: 200px;
+    height: calc(100vh - 4rem);
 
-.sidenav .mat-toolbar {
-  background: inherit;
+    .mat-toolbar {
+      background: inherit;
+    }
+
+    .active-link {
+      background: rgba(var(--secondary-color), 0.8);
+    }
+
+    &::ng-deep.mdc-list-item__primary-text {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.1rem;
+    }
+  }
 }
 
 
@@ -359,17 +377,27 @@ import {
   ChangeDetectionStrategy,
   Component,
   input,
+  signal,
   viewChild,
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatListItem, MatNavList } from '@angular/material/list';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-sidenav',
   standalone: true,
-  imports: [MatSidenavModule, MatToolbar, MatNavList, MatListItem, RouterLink],
+  imports: [
+    MatSidenavModule,
+    MatToolbar,
+    MatNavList,
+    MatListItem,
+    RouterLink,
+    RouterLinkActive,
+    MatIconModule,
+  ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -379,8 +407,10 @@ export class SidenavComponent {
 
   drawer = viewChild.required<MatSidenav>('drawer');
 
-  async toggleDrawer() {
-    await this.drawer().toggle();
+  isSideNavOpen = signal(false);
+
+  toggleDrawer() {
+    this.isSideNavOpen.update((state) => !state);
   }
 }
 
@@ -389,6 +419,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 import { CanMatchFn, Route, Router, UrlSegment } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '@lib/services';
+import { map } from 'rxjs';
 
 interface AuthGuardOptions {
   requiresAuthentication: boolean;
@@ -399,22 +430,38 @@ const defaultAuthGuardOptions = (): AuthGuardOptions => ({
 });
 
 export const authGuard = (
-  options: AuthGuardOptions = defaultAuthGuardOptions()
+  options: AuthGuardOptions = defaultAuthGuardOptions(),
 ): CanMatchFn => {
   return (_: Route, segments: UrlSegment[]) => {
     const router = inject(Router);
     const authService = inject(AuthService);
 
-    if (options.requiresAuthentication === authService.isAuthenticated())
-      return true;
+    return authService.refreshToken().pipe(
+      map((res: boolean) => {
+        if (
+          options.requiresAuthentication &&
+          (authService.isAuthenticated() || res)
+        ) {
+          return true;
+        }
 
-    return options.requiresAuthentication
-      ? router.createUrlTree(['/auth/login'], {
-          queryParams: {
-            returnUrl: segments.map((s) => s.path).join('/'),
-          },
-        })
-      : router.createUrlTree(['/']);
+        const currentUrl = segments.map((s) => s.path).join('/');
+        const isAuthPage =
+          currentUrl === 'auth/login' || currentUrl === 'auth/register';
+
+        if (isAuthPage) {
+          return true; // Allow access to the login page
+        }
+
+        return options.requiresAuthentication
+          ? router.createUrlTree(['/auth/login'], {
+              queryParams: {
+                returnUrl: currentUrl,
+              },
+            })
+          : router.createUrlTree(['/']);
+      }),
+    );
   };
 };
 
@@ -437,7 +484,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
 
-  if (authService.isAuthenticated()) {
+  if (authService.isAuthenticated() && tokenService.accessToken) {
     req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${tokenService.accessToken}`,
@@ -453,51 +500,69 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 import {
   HttpErrorResponse,
   HttpInterceptorFn,
+  HttpRequest,
   HttpStatusCode,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
+
 import { AuthService, TokenService } from '@lib/services';
 import { catchError, switchMap, throwError, EMPTY } from 'rxjs';
-import { ITokens } from '@myworkspace/data-models';
 
 export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const authSvc = inject(AuthService);
   const tokenSvc = inject(TokenService);
-  const router = inject(Router);
+
+  const handleUnauthorizedError = (req: HttpRequest<unknown>) => {
+    if (tokenSvc.refreshToken) {
+      return authSvc.refreshToken().pipe(
+        switchMap((res: boolean) => {
+          if (res) {
+            const { accessToken } = tokenSvc;
+
+            const modifiedReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
+
+            return next(modifiedReq);
+          }
+
+          // Refresh token failed
+          authSvc.logout();
+
+          return EMPTY;
+        }),
+      );
+    }
+
+    // No refresh token
+    authSvc.logout();
+
+    return EMPTY;
+  };
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === HttpStatusCode.Unauthorized) {
-        // Attempt to refresh token
-        if (tokenSvc.refreshToken) {
-          return authSvc.reAuthenticate(tokenSvc.refreshToken).pipe(
-            switchMap((res: ITokens) => {
-              const { accessToken } = tokenSvc;
-
-              const modifiedReq = req.clone({
-                setHeaders: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              });
-
-              return next(modifiedReq);
-            }),
-            catchError((refreshError: HttpErrorResponse) => {
-              if (refreshError.status === HttpStatusCode.Unauthorized)
-                authSvc.logout();
-
-              return throwError(() => refreshError);
-            }),
-          );
-        } else {
+      switch (error.status) {
+        case HttpStatusCode.Forbidden:
           authSvc.logout();
-          router.navigateByUrl('/auth/login');
           return EMPTY;
-        }
-      }
 
-      return throwError(() => error);
+        case HttpStatusCode.Unauthorized:
+          return handleUnauthorizedError(req);
+
+        case 0:
+          return throwError(
+            () =>
+              new Error(
+                'No internet connection. Please check your network and try again.',
+              ),
+          );
+
+        default:
+          return throwError(() => error);
+      }
     }),
   );
 };
@@ -515,21 +580,34 @@ export interface IApiResponse<T> {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/auth.service.ts
-import { IAuthResponse, ITokens } from '@myworkspace/data-models';
+import {
+  ILoginResponse,
+  IRefreshTokenResponse,
+  IRegisterResponse,
+} from '@myworkspace/data-models';
 import { inject, Injectable, signal } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import {
+  catchError,
+  Observable,
+  of,
+  switchMap,
+  throttleTime,
+  throwError,
+} from 'rxjs';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
 import { IApiResponse } from '@lib/interfaces';
 import { TokenType } from '@prisma/client';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly httpClient = inject(HttpClient);
+  private readonly router = inject(Router);
 
   private readonly tokenSvc = inject(TokenService);
   private readonly userSvc = inject(UserService);
@@ -539,9 +617,9 @@ export class AuthService {
   login(
     email: string,
     password: string,
-  ): Observable<IApiResponse<IAuthResponse>> {
+  ): Observable<IApiResponse<ILoginResponse>> {
     return this.httpClient
-      .post<IApiResponse<IAuthResponse>>(
+      .post<IApiResponse<ILoginResponse>>(
         'http://localhost:3000/v1/auth/login',
         {
           email,
@@ -549,79 +627,100 @@ export class AuthService {
         },
       )
       .pipe(
-        switchMap((res: IApiResponse<IAuthResponse>) => {
+        switchMap((res: IApiResponse<ILoginResponse>) => {
           const { tokens, user } = res.data;
 
           this.userSvc.user.set(user);
           this.tokenSvc.setTokens(tokens);
           this.isAuthenticated.set(true);
-          return of(res);
-        }),
-        catchError((error) => {
-          return throwError(() => error);
-        }),
-      );
-  }
 
-  reAuthenticate(refreshToken: string): Observable<ITokens> {
-    return this.httpClient
-      .post<ITokens>('http://localhost:3000/v1/auth/generate-new-tokens', {
-        refreshToken,
-      })
-      .pipe(
-        switchMap((res: ITokens) => {
-          this.tokenSvc.setTokens(res);
-          this.isAuthenticated.set(true);
           return of(res);
         }),
         catchError((error: HttpErrorResponse) => {
-          this.isAuthenticated.set(false);
-          this.tokenSvc.clear();
           return throwError(() => error);
         }),
       );
   }
 
-  validateRefreshToken(refreshToken: string): Observable<IApiResponse<any>> {
+  refreshToken(): Observable<boolean> {
+    const { refreshToken } = this.tokenSvc;
+
+    if (!refreshToken) {
+      this.clearSession();
+      return of(false);
+    }
+
+    if (this.isAuthenticated() && this.tokenSvc.accessToken) {
+      return of(true);
+    }
+
     return this.httpClient
-      .post<IApiResponse<any>>(
-        'http://localhost:3000/v1/auth/check-refresh-token-validity',
+      .post<IApiResponse<IRefreshTokenResponse>>(
+        'http://localhost:3000/v1/auth/refresh-token',
         {
           refreshToken,
         },
       )
       .pipe(
-        switchMap((res: IApiResponse<any>) => {
+        switchMap((res: IApiResponse<IRefreshTokenResponse>) => {
           if (res.data.user) {
             this.isAuthenticated.set(true);
             this.userSvc.user.set(res.data.user);
-            // this.tokenSvc.setTokens(res.data.tokens);
             this.tokenSvc.setToken(
               res.data.accessToken.token,
               TokenType.ACCESS,
               res.data.accessToken.expires,
             );
 
-            return of(res);
+            return of(true);
           }
 
-          this.tokenSvc.clear();
-          this.isAuthenticated.set(false);
-          return throwError(() => new Error('Invalid refresh token'));
+          this.clearSession();
+          return of(false);
         }),
         catchError((error: HttpErrorResponse) => {
-          this.tokenSvc.clear();
+          this.clearSession();
+          return of(false);
+        }),
+      );
+  }
+
+  register(
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) {
+    return this.httpClient
+      .post<IApiResponse<IRegisterResponse>>(
+        'http://localhost:3000/v1/auth/register',
+        {
+          name,
+          email,
+          password,
+          confirmPassword,
+        },
+      )
+      .pipe(
+        switchMap((res: IApiResponse<IRegisterResponse>) => {
+          this.router.navigateByUrl('/auth/login');
+          return of(res);
+        }),
+        catchError((error: HttpErrorResponse) => {
           return throwError(() => error);
         }),
       );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  register(): void {}
-
   logout(): void {
+    this.clearSession();
+    this.router.navigateByUrl('/auth/login');
+  }
+
+  private clearSession(): void {
     this.tokenSvc.clear();
     this.isAuthenticated.set(false);
+    this.userSvc.user.set(null);
   }
 }
 
@@ -702,6 +801,62 @@ export class UserService {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/validators/match-validator.ts
+import {
+  ValidatorFn,
+  AbstractControl,
+  ValidationErrors,
+  FormGroup,
+} from '@angular/forms';
+
+export function matchValidator(matchingControlName: string): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const group = control.parent as FormGroup;
+
+    if (!group) {
+      return null;
+    }
+
+    const matchingControl = group.controls[matchingControlName];
+    const controlValue = control.value;
+    const matchingControlValue = matchingControl.value;
+
+    if (controlValue !== matchingControlValue) {
+      return { noMatching: true };
+    }
+
+    return null;
+  };
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/validators/zod-validator.validator.ts
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { fromError } from 'zod-validation-error';
+import { ZodSchema } from 'zod';
+
+export function zodValidator(schema: ZodSchema): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const result = schema.safeParse(control.value);
+    if (result.success) {
+      return null;
+    }
+
+    const zodErrors = fromError(result.error).details;
+
+    const errors = zodErrors.reduce(
+      (acc, error) => {
+        acc[error.code] = error.message;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
+    return errors;
+  };
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/index.ts
 import { Routes } from '@angular/router';
 
@@ -725,21 +880,39 @@ export const routes: Routes = [
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/login/login.component.html
 <div class="container">
-  <form class="container__form" [formGroup]="loginForm" (ngSubmit)="onSignIn()">
+  <form
+    class="container__form"
+    [formGroup]="loginForm"
+    (keydown.enter)="onSignIn()"
+  >
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input formControlName="email" matInput />
+      <input [formControl]="email" matInput />
+      @if (email.hasError('required') && (email.dirty || email.touched)) {
+        <mat-error> Email is required </mat-error>
+      } @else if (
+        email.hasError('invalid_string') && (email.dirty || email.touched)
+      ) {
+        <mat-error> {{ email.getError('invalid_string') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input formControlName="password" type="password" matInput />
+      <input [formControl]="password" type="password" matInput />
+      @if (password.hasError('required') && (email.dirty || password.touched)) {
+        <mat-error> Password is required </mat-error>
+      } @else if (
+        password.hasError('too_small') && (password.dirty || password.touched)
+      ) {
+        <mat-error> {{ password.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <button
-      [disabled]="loginForm.invalid"
+      [disabled]="loginForm.invalid || isSubmitted()"
       (click)="onSignIn()"
       color="primary"
       mat-flat-button
@@ -807,31 +980,44 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/login/login.component.ts
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  Signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
 import {
   FormControl,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { zodValidator } from '@lib/validators/zod-validator.validator';
+import { LoginSchema } from '@myworkspace/data-models';
+import { injectQueryParams } from 'ngxtension/inject-query-params';
+import { ToastrService } from 'ngx-toastr';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
+    MatButtonModule,
     MatFormField,
-    MatInput,
-    MatLabel,
     RouterLink,
     ReactiveFormsModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -839,37 +1025,53 @@ import {
 })
 export class LoginComponent {
   private readonly authSvc = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly toastrSvc = inject(ToastrService);
 
-  email = new FormControl<string>('', [Validators.required, Validators.email]);
-  password = new FormControl<string>('', [Validators.required]);
+  private readonly router = inject(Router);
+
+  protected isSubmitted = signal(false);
+
+  readonly returnUrl = injectQueryParams('returnUrl', {
+    initialValue: '/',
+  }) as Signal<string>;
+
+  email = new FormControl<string>('', [
+    zodValidator(LoginSchema.shape.email),
+    Validators.required,
+  ]);
+  password = new FormControl<string>('', [
+    zodValidator(LoginSchema.shape.password),
+    Validators.required,
+  ]);
 
   loginForm = new FormGroup({
     email: this.email,
     password: this.password,
   });
 
-  onSignIn() {
+  onSignIn(): void {
     if (this.loginForm.invalid) return;
 
-    const email = this.loginForm.value.email ?? '';
-    const password = this.loginForm.value.password ?? '';
+    this.isSubmitted.set(true);
 
-    this.authSvc.login(email, password).subscribe({
-      next: (res) => {
-        console.log('done');
-        const url = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(url);
-      },
-      error: (err) => {
-        console.log('aici');
-        console.error(err);
-      },
-      complete: () => {
-        console.log('complete');
-      },
-    });
+    this.authSvc
+      .login(this.email.value as string, this.password.value as string)
+      .subscribe({
+        complete: () => {
+          this.router.navigateByUrl(this.returnUrl());
+          this.toastrSvc.success('Logged in successfully');
+          this.isSubmitted.set(false);
+        },
+        error: (error: HttpErrorResponse | Error) => {
+          const errorMessage =
+            error instanceof HttpErrorResponse
+              ? error.error.message
+              : error.message;
+
+          this.toastrSvc.error(errorMessage);
+          this.isSubmitted.set(false);
+        },
+      });
   }
 }
 
@@ -892,20 +1094,73 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input matInput />
+      <input [formControl]="name" matInput />
+      @if (name.hasError('required') && (name.dirty || name.touched)) {
+        <mat-error> Name is required </mat-error>
+      } @else if (name.hasError('too_small') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input matInput />
+      <input [formControl]="email" matInput />
+      @if (email.hasError('required') && (email.dirty || email.touched)) {
+        <mat-error> Email is required </mat-error>
+      } @else if (
+        email.hasError('too_small') && (email.dirty || email.touched)
+      ) {
+        <mat-error> {{ email.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input matInput />
+      <input [formControl]="password" matInput />
+      @if (
+        password.hasError('required') && (password.dirty || password.touched)
+      ) {
+        <mat-error> Password is required </mat-error>
+      } @else if (
+        password.hasError('invalid_string') &&
+        (password.dirty || password.touched)
+      ) {
+        <mat-error> {{ password.getError('invalid_string') }} </mat-error>
+      }
     </mat-form-field>
 
-    <button  (click)="onSignUp()" color="primary" mat-flat-button type="button">Sign Up</button>
+    <mat-form-field>
+      <mat-label>Confirm Password</mat-label>
+      <input [formControl]="confirmPassword" matInput />
+      @if (
+        confirmPassword.hasError('required') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error> Confirm password is required </mat-error>
+      } @else if (
+        confirmPassword.hasError('too_small') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error>
+          {{ confirmPassword.getError('too_small') }}
+        </mat-error>
+      } @else if (
+        confirmPassword.hasError('noMatching') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error> Passwords do not match </mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      [disabled]="registerForm.invalid"
+      (click)="onSignUp()"
+      color="primary"
+      mat-flat-button
+      type="button"
+    >
+      Sign Up
+    </button>
   </form>
 </div>
 
@@ -955,11 +1210,22 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/auth/register/register.component.ts
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { zodValidator } from '@lib/validators/zod-validator.validator';
+import { BaseRegisterSchema } from '@myworkspace/data-models';
+import { matchValidator } from '@lib/validators/match-validator';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
@@ -971,6 +1237,8 @@ import { AuthService } from '@lib/services';
     MatLabel,
     MatButton,
     RouterLink,
+    ReactiveFormsModule,
+    MatError,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -978,16 +1246,59 @@ import { AuthService } from '@lib/services';
 })
 export class RegisterComponent {
   private authSvc = inject(AuthService);
+  private toastrSvc = inject(ToastrService);
+
+  name = new FormControl('', [
+    zodValidator(BaseRegisterSchema.shape.name),
+    Validators.required,
+  ]);
+  email = new FormControl('', [
+    zodValidator(BaseRegisterSchema.shape.email),
+    Validators.required,
+  ]);
+  password = new FormControl('', [
+    zodValidator(BaseRegisterSchema.shape.password),
+    Validators.required,
+  ]);
+  confirmPassword = new FormControl('', [
+    matchValidator('password'),
+    Validators.required,
+  ]);
+
+  registerForm = new FormGroup({
+    name: this.name,
+    email: this.email,
+    password: this.password,
+    confirmPassword: this.confirmPassword,
+  });
 
   onSignUp() {
-    this.authSvc.register();
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    this.authSvc
+      .register(
+        this.name.value as string,
+        this.email.value as string,
+        this.password.value as string,
+        this.confirmPassword.value as string,
+      )
+      .subscribe({
+        complete: () => {
+          this.toastrSvc.success('Registration successful!');
+        },
+        error: (error: HttpErrorResponse) => {
+          this.toastrSvc.error(error.error.message);
+        },
+      });
   }
 }
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.html
 <app-navbar [isHandset]="isHandset$ | async">
-  <button (click)="testMethod()">test method</button>
+  <router-outlet></router-outlet>
 </app-navbar>
 
 
@@ -995,43 +1306,78 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.ts
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map, shareReplay } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
+  imports: [CommonModule, NavbarComponent, RouterOutlet],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  private readonly httpClient = inject(HttpClient);
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(
       map((result) => result.matches),
-      shareReplay(),
+      shareReplay(1),
+      takeUntilDestroyed(),
     );
-
-  testMethod() {
-    this.httpClient.post('http://localhost:3000/v1/task/test', {}).subscribe({
-      next: (response) => console.log(response),
-      error: (error) => {
-        console.log('aici');
-      },
-      complete: () => console.info('complete'),
-    });
-  }
 }
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/done/done.component.html
+<p>done works!</p>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/done/done.component.scss
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/done/done.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-done',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './done.component.html',
+  styleUrl: './done.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DoneComponent {}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/inbox/inbox.component.html
+<p>inbox works!</p>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/inbox/inbox.component.scss
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/inbox/inbox.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-inbox',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './inbox.component.html',
+  styleUrl: './inbox.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class InboxComponent {}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/index.ts
@@ -1042,10 +1388,55 @@ export const routes: Routes = [
     path: '',
     title: 'Dashboard',
     loadComponent: async () =>
-      await import('./dashboard.component').then((m) => m.DashboardComponent),
+      await import('@pages/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent,
+      ),
+    children: [
+      {
+        path: '',
+        title: 'Recent Tasks',
+        loadComponent: async () =>
+          await import('./recent/recent.component').then(
+            (m) => m.RecentComponent,
+          ),
+      },
+      {
+        path: 'done',
+        title: 'Done Tasks',
+        loadComponent: async () =>
+          await import('./done/done.component').then((m) => m.DoneComponent),
+      },
+      {
+        path: 'inbox',
+        title: 'Inbox',
+        loadComponent: async () =>
+          await import('./inbox/inbox.component').then((m) => m.InboxComponent),
+      },
+    ],
   },
 ];
 
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.html
+<p>recent works!</p>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.scss
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-recent',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './recent.component.html',
+  styleUrl: './recent.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class RecentComponent {}
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/index.html
 <!DOCTYPE html>
@@ -1097,15 +1488,17 @@ $todo-app-warn: mat.define-palette(mat.$red-palette);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$todo-app-theme: mat.define-light-theme((
-  color: (
-    primary: $todo-app-primary,
-    accent: $todo-app-accent,
-    warn: $todo-app-warn,
-  ),
-  typography: mat.define-typography-config(),
-  density: 0
-));
+$todo-app-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $todo-app-primary,
+      accent: $todo-app-accent,
+      warn: $todo-app-warn,
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
@@ -1115,17 +1508,23 @@ $todo-app-theme: mat.define-light-theme((
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  --main-color:#217981;
-  --secondary-color: #38DDB6;
-  --white-color: #faffff;
+  --main-color: 26, 121, 130;
+  --secondary-color: 41, 222, 182;
+  --white-color: 249, 255, 254;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html, body { height: 100%; }
-body { font-family: Roboto, "Helvetica Neue", sans-serif; margin: 0; }
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  margin: 0;
+}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/test-setup.ts
@@ -1256,6 +1655,180 @@ export default {
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/todo-server',
 };
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419080108_init/migration.sql
+-- CreateTable
+CREATE TABLE "Post" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "content" TEXT,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "authorId" INTEGER NOT NULL,
+
+    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Profile" (
+    "id" SERIAL NOT NULL,
+    "bio" TEXT,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419083352_init/migration.sql
+/*
+  Warnings:
+
+  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
+  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
+  - Added the required column `password` to the `User` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `updatedAt` to the `User` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- DropForeignKey
+ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
+
+-- AlterTable
+ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
+ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "password" VARCHAR(255) NOT NULL,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
+ALTER COLUMN "id" DROP DEFAULT,
+ALTER COLUMN "id" SET DATA TYPE TEXT,
+ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
+DROP SEQUENCE "User_id_seq";
+
+-- DropTable
+DROP TABLE "Post";
+
+-- DropTable
+DROP TABLE "Profile";
+
+-- CreateTable
+CREATE TABLE "Task" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "description" TEXT,
+    "dueDate" TIMESTAMP(3),
+    "completed" BOOLEAN NOT NULL DEFAULT false,
+    "categoryId" TEXT,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419085235_init/migration.sql
+/*
+  Warnings:
+
+  - Made the column `categoryId` on table `Task` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- DropForeignKey
+ALTER TABLE "Task" DROP CONSTRAINT "Task_categoryId_fkey";
+
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "categoryId" SET NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240425085502_init/migration.sql
+/*
+  Warnings:
+
+  - Made the column `name` on table `User` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- CreateEnum
+CREATE TYPE "TokenType" AS ENUM ('ACCESS', 'REFRESH', 'RESET_PASSWORD', 'VERIFY_EMAIL');
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "name" SET NOT NULL;
+
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" SERIAL NOT NULL,
+    "token" TEXT NOT NULL,
+    "type" "TokenType" NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "blacklisted" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240430130308_init/migration.sql
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240521081151_init/migration.sql
+-- AlterTable
+ALTER TABLE "Token" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/migration_lock.toml
+# Please do not edit this file manually
+# It should be added in your version-control system (i.e. Git)
+provider = "postgresql"
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/schema.prisma
 // This is your Prisma schema file,
@@ -1580,25 +2153,27 @@ export const roleRights = new Map(Object.entries(allRoles));
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/auth.controller.ts
-import { access } from 'fs';
 import { Request, Response } from 'express';
 
 import httpStatus from 'http-status';
-import { z } from 'zod';
 
-import { LoginSchema, RegistrationSchema } from '@myworkspace/data-models';
+import {
+  ILogin,
+  IRegister,
+  LoginSchema,
+  RegisterSchema,
+} from '@myworkspace/data-models';
 
 import { authService, tokenService, userService } from '../services';
 
 import { catchAsync } from '../utils';
+
 import { TokenType } from '@prisma/client';
 
 export const register = catchAsync(async (req: Request, res: Response) => {
-  RegistrationSchema.parse(req.body);
+  RegisterSchema.parse(req.body);
 
-  const { email, name, password } = req.body as z.infer<
-    typeof RegistrationSchema
-  >;
+  const { email, name, password } = req.body as IRegister;
 
   const user = await userService.createUser(email, name, password);
 
@@ -1611,7 +2186,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 export const login = catchAsync(async (req: Request, res: Response) => {
   LoginSchema.parse(req.body);
 
-  const { email, password } = req.body as z.infer<typeof LoginSchema>;
+  const { email, password } = req.body as ILogin;
 
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
@@ -1622,48 +2197,35 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const generateNewTokens = catchAsync(
-  async (req: Request, res: Response) => {
-    const tokens = await authService.refreshAuth(req.body.refreshToken);
+export const refreshToken = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
 
-    return res.status(httpStatus.OK).json({
-      message: 'Token refreshed successfully',
-      data: tokens,
+  const refreshTokenData = await tokenService.verifyToken(
+    refreshToken,
+    TokenType.REFRESH,
+  );
+
+  if (!refreshTokenData) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Invalid refresh token',
     });
-  },
-);
+  }
 
-export const checkRefreshTokenValidity = catchAsync(
-  async (req: Request, res: Response) => {
-    const { refreshToken } = req.body;
+  const user = await userService.getUserById(refreshTokenData.userId);
 
-    const refreshTokenData = await tokenService.verifyToken(
-      refreshToken,
-      TokenType.REFRESH,
-    );
-
-    if (!refreshTokenData) {
-      return res.status(httpStatus.UNAUTHORIZED).json({
-        message: 'Invalid refresh token',
-      });
-    }
-
-    const user = await userService.getUserById(refreshTokenData.userId);
-
-    if (!user) {
-      return res.status(httpStatus.NOT_FOUND).json({
-        message: 'User not found',
-      });
-    }
-
-    const accessToken = await tokenService.generateAccessToken(user);
-
-    return res.status(httpStatus.OK).json({
-      message: 'Token validated successfully',
-      data: { user, accessToken },
+  if (!user) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      message: 'User not found',
     });
-  },
-);
+  }
+
+  const accessToken = await tokenService.generateAccessToken(user);
+
+  return res.status(httpStatus.OK).json({
+    message: 'Token validated successfully',
+    data: { user, accessToken },
+  });
+});
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/index.ts
@@ -1874,11 +2436,7 @@ router.post('/register', authController.register);
 
 router.post('/login', authController.login);
 
-router.post('/generate-new-tokens', authController.generateNewTokens);
-router.post(
-  '/check-refresh-token-validity',
-  authController.checkRefreshTokenValidity,
-);
+router.post('/refresh-token', authController.refreshToken);
 
 export default router;
 
@@ -1966,7 +2524,7 @@ export const loginUserWithEmailAndPassword = async (
   const isPasswordValid = await matchPassword(password, user.password);
 
   if (!isPasswordValid)
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid password');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid password');
 
   return exclude(user, ['password', 'createdAt', 'updatedAt']);
 };
@@ -2006,7 +2564,6 @@ import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import prisma from '../client.js';
-import { access } from 'fs';
 
 interface JwtPayload {
   sub: string;
@@ -2178,7 +2735,7 @@ export const createUser = async (
     },
   });
 
-  return user;
+  return exclude(user, ['password', 'createdAt', 'updatedAt']);
 };
 
 export const getUserById = async (id: string) => {

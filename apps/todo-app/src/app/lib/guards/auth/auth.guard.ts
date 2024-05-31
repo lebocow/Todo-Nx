@@ -28,9 +28,10 @@ export const authGuard = (
         }
 
         const currentUrl = segments.map((s) => s.path).join('/');
-        const isLoginPage = currentUrl === 'auth/login';
+        const isAuthPage =
+          currentUrl === 'auth/login' || currentUrl === 'auth/register';
 
-        if (isLoginPage) {
+        if (isAuthPage) {
           return true; // Allow access to the login page
         }
 

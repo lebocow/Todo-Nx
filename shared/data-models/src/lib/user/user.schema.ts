@@ -1,9 +1,11 @@
+import { Role } from '@prisma/client';
 import { z } from 'zod';
 
 export const BaseUserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   name: z.string(),
+  role: z.nativeEnum(Role),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

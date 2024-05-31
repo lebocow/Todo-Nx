@@ -27,7 +27,7 @@ export class TokenService {
     );
   }
 
-  setToken(token: string, type: TokenType, expires: number) {
+  setToken(token: string, type: TokenType, expires: number): void {
     const cookieName = this.getCookieName(type);
 
     this.cookieSvc.set(cookieName, token, {

@@ -17,7 +17,10 @@
         "tsConfig": "apps/todo-app/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": ["apps/todo-app/src/favicon.ico", "apps/todo-app/src/assets"],
-        "styles": ["apps/todo-app/src/styles.scss"],
+        "styles": [
+          "apps/todo-app/src/styles.scss",
+          "node_modules/ngx-toastr/toastr.css"
+        ],
         "scripts": []
       },
       "configurations": {

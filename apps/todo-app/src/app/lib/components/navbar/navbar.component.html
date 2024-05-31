@@ -1,17 +1,20 @@
-<app-sidenav #drawer [isHandset]="isHandset()">
+<app-sidenav>
   <ng-content />
 </app-sidenav>
 
 <mat-toolbar color="primary">
-  @if ((isHandset())) {
-  <button
-    type="button"
-    aria-label="Toggle sidenav"
-    mat-icon-button
-    (click)="drawer.toggleDrawer()"
-  >
-    <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-  </button>
+  @if (
+    breakpointSvc.breakpoints()?.['Small'] ||
+    breakpointSvc.breakpoints()?.['XSmall']
+  ) {
+    <button
+      (click)="toggleSidenav()"
+      type="button"
+      aria-label="Toggle sidenav"
+      mat-icon-button
+    >
+      <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+    </button>
   }
   <span>todo-app</span>
 </mat-toolbar>

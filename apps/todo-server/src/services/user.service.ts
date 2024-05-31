@@ -27,7 +27,7 @@ export const createUser = async (
     },
   });
 
-  return user;
+  return exclude(user, ['password', 'createdAt', 'updatedAt']);
 };
 
 export const getUserById = async (id: string) => {

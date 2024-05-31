@@ -15,19 +15,72 @@
 
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input matInput />
+      <input [formControl]="name" matInput />
+      @if (name.hasError('required') && (name.dirty || name.touched)) {
+        <mat-error> Name is required </mat-error>
+      } @else if (name.hasError('too_small') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input matInput />
+      <input [formControl]="email" matInput />
+      @if (email.hasError('required') && (email.dirty || email.touched)) {
+        <mat-error> Email is required </mat-error>
+      } @else if (
+        email.hasError('too_small') && (email.dirty || email.touched)
+      ) {
+        <mat-error> {{ email.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input matInput />
+      <input [formControl]="password" matInput />
+      @if (
+        password.hasError('required') && (password.dirty || password.touched)
+      ) {
+        <mat-error> Password is required </mat-error>
+      } @else if (
+        password.hasError('invalid_string') &&
+        (password.dirty || password.touched)
+      ) {
+        <mat-error> {{ password.getError('invalid_string') }} </mat-error>
+      }
     </mat-form-field>
 
-    <button  (click)="onSignUp()" color="primary" mat-flat-button type="button">Sign Up</button>
+    <mat-form-field>
+      <mat-label>Confirm Password</mat-label>
+      <input [formControl]="confirmPassword" matInput />
+      @if (
+        confirmPassword.hasError('required') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error> Confirm password is required </mat-error>
+      } @else if (
+        confirmPassword.hasError('too_small') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error>
+          {{ confirmPassword.getError('too_small') }}
+        </mat-error>
+      } @else if (
+        confirmPassword.hasError('noMatching') &&
+        (confirmPassword.dirty || confirmPassword.touched)
+      ) {
+        <mat-error> Passwords do not match </mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      [disabled]="registerForm.invalid"
+      (click)="onSignUp()"
+      color="primary"
+      mat-flat-button
+      type="button"
+    >
+      Sign Up
+    </button>
   </form>
 </div>

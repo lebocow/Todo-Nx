@@ -4,7 +4,7 @@
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: var(--main-color)
+  background: rgba(var(--main-color));
 }
 
 .container {
@@ -13,7 +13,7 @@
   justify-content: space-between;
   width: 50rem;
   border-radius: 0.5rem;
-  background: var(--white-color);
+  background: rgba(var(--white-color));
 
   &__info {
     display: flex;
@@ -21,8 +21,8 @@
     flex-direction: column;
     justify-content: center;
     padding: 2rem;
-    color: var(--white-color);
-    background: var(--secondary-color)
+    color: rgba(var(--white-color));
+    background: rgba(var(--secondary-color));
   }
 
   &__form {
@@ -34,7 +34,7 @@
     &__title {
       margin-top: 0;
       text-align: center;
-      color: var(--main-color);
+      color: rgba(var(--main-color));
     }
   }
 }

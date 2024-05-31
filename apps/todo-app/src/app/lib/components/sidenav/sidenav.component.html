@@ -1,17 +1,66 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
-    #drawer
-    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
-    [mode]="isHandset() ? 'over' : 'side'"
-    [opened]="!isHandset()"
     class="sidenav"
+    #drawer
+    [mode]="
+      breakpointSvc.breakpoints()?.['Small'] ||
+      breakpointSvc.breakpoints()?.['XSmall']
+        ? 'over'
+        : 'side'
+    "
+    [attr.role]="
+      breakpointSvc.breakpoints()?.['Small'] ||
+      breakpointSvc.breakpoints()?.['XSmall']
+        ? 'dialog'
+        : 'navigation'
+    "
+    [opened]="
+      sidenavSvc.isSideNavOpen() ||
+      !(
+        breakpointSvc.breakpoints()?.['Small'] ||
+        breakpointSvc.breakpoints()?.['XSmall']
+      )
+    "
     fixedInViewport
   >
     <mat-toolbar>Menu</mat-toolbar>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/">Recent</a>
-      <a mat-list-item routerLink="/">Done</a>
-      <a mat-list-item routerLink="/">Inbox</a>
+    <mat-nav-list class="sidenav-list">
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        mat-list-item
+        color="primary"
+        routerLinkActive="active-link"
+        routerLink="/"
+      >
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="calendar_today"
+        />
+        <span>Recent</span>
+      </a>
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        mat-list-item
+        routerLinkActive="active-link"
+        routerLink="/done"
+        ><mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="event_available"
+        />Done</a
+      >
+      <a
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active-link"
+        routerLink="/inbox"
+        mat-list-item
+        ><mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="inbox"
+        />Inbox</a
+      >
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>

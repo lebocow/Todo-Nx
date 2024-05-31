@@ -21,7 +21,7 @@ export const loginUserWithEmailAndPassword = async (
   const isPasswordValid = await matchPassword(password, user.password);
 
   if (!isPasswordValid)
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid password');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid password');
 
   return exclude(user, ['password', 'createdAt', 'updatedAt']);
 };

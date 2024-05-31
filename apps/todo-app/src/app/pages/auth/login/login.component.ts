@@ -1,28 +1,41 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  Signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@lib/services';
 import {
   FormControl,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { zodValidator } from '@lib/validators/zod-validator.validator';
+import { LoginSchema } from '@myworkspace/data-models';
+import { injectQueryParams } from 'ngxtension/inject-query-params';
+import { ToastrService } from 'ngx-toastr';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    MatButton,
+    MatButtonModule,
     MatFormField,
-    MatInput,
-    MatLabel,
     RouterLink,
     ReactiveFormsModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -30,11 +43,24 @@ import {
 })
 export class LoginComponent {
   private readonly authSvc = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly toastrSvc = inject(ToastrService);
 
-  email = new FormControl<string>('', [Validators.required, Validators.email]);
-  password = new FormControl<string>('', [Validators.required]);
+  private readonly router = inject(Router);
+
+  protected isSubmitted = signal(false);
+
+  readonly returnUrl = injectQueryParams('returnUrl', {
+    initialValue: '/',
+  }) as Signal<string>;
+
+  email = new FormControl<string>('', [
+    zodValidator(LoginSchema.shape.email),
+    Validators.required,
+  ]);
+  password = new FormControl<string>('', [
+    zodValidator(LoginSchema.shape.password),
+    Validators.required,
+  ]);
 
   loginForm = new FormGroup({
     email: this.email,
@@ -44,22 +70,25 @@ export class LoginComponent {
   onSignIn(): void {
     if (this.loginForm.invalid) return;
 
-    const email = this.loginForm.value.email ?? '';
-    const password = this.loginForm.value.password ?? '';
+    this.isSubmitted.set(true);
 
-    this.authSvc.login(email, password).subscribe({
-      next: (res) => {
-        console.log('done');
-        const url = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(url);
-      },
-      error: (err) => {
-        console.log('aici');
-        console.error(err);
-      },
-      complete: () => {
-        console.log('complete');
-      },
-    });
+    this.authSvc
+      .login(this.email.value as string, this.password.value as string)
+      .subscribe({
+        complete: () => {
+          this.router.navigateByUrl(this.returnUrl());
+          this.toastrSvc.success('Logged in successfully');
+          this.isSubmitted.set(false);
+        },
+        error: (error: HttpErrorResponse | Error) => {
+          const errorMessage =
+            error instanceof HttpErrorResponse
+              ? error.error.message
+              : error.message;
+
+          this.toastrSvc.error(errorMessage);
+          this.isSubmitted.set(false);
+        },
+      });
   }
 }

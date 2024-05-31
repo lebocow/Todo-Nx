@@ -1,19 +1,37 @@
 <div class="container">
-  <form class="container__form" [formGroup]="loginForm" (ngSubmit)="onSignIn()">
+  <form
+    class="container__form"
+    [formGroup]="loginForm"
+    (keydown.enter)="onSignIn()"
+  >
     <h1 class="container__form__title">Sign in to Cando</h1>
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input formControlName="email" matInput />
+      <input [formControl]="email" matInput />
+      @if (email.hasError('required') && (email.dirty || email.touched)) {
+        <mat-error> Email is required </mat-error>
+      } @else if (
+        email.hasError('invalid_string') && (email.dirty || email.touched)
+      ) {
+        <mat-error> {{ email.getError('invalid_string') }} </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input formControlName="password" type="password" matInput />
+      <input [formControl]="password" type="password" matInput />
+      @if (password.hasError('required') && (email.dirty || password.touched)) {
+        <mat-error> Password is required </mat-error>
+      } @else if (
+        password.hasError('too_small') && (password.dirty || password.touched)
+      ) {
+        <mat-error> {{ password.getError('too_small') }} </mat-error>
+      }
     </mat-form-field>
 
     <button
-      [disabled]="loginForm.invalid"
+      [disabled]="loginForm.invalid || isSubmitted()"
       (click)="onSignIn()"
       color="primary"
       mat-flat-button

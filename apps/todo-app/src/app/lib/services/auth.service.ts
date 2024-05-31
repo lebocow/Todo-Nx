@@ -1,4 +1,8 @@
-import { IAuthResponse } from '@myworkspace/data-models';
+import {
+  ILoginResponse,
+  IRefreshTokenResponse,
+  IRegisterResponse,
+} from '@myworkspace/data-models';
 import { inject, Injectable, signal } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -24,9 +28,9 @@ export class AuthService {
   login(
     email: string,
     password: string,
-  ): Observable<IApiResponse<IAuthResponse>> {
+  ): Observable<IApiResponse<ILoginResponse>> {
     return this.httpClient
-      .post<IApiResponse<IAuthResponse>>(
+      .post<IApiResponse<ILoginResponse>>(
         'http://localhost:3000/v1/auth/login',
         {
           email,
@@ -34,15 +38,16 @@ export class AuthService {
         },
       )
       .pipe(
-        switchMap((res: IApiResponse<IAuthResponse>) => {
+        switchMap((res: IApiResponse<ILoginResponse>) => {
           const { tokens, user } = res.data;
 
           this.userSvc.user.set(user);
           this.tokenSvc.setTokens(tokens);
           this.isAuthenticated.set(true);
+
           return of(res);
         }),
-        catchError((error) => {
+        catchError((error: HttpErrorResponse) => {
           return throwError(() => error);
         }),
       );
@@ -56,12 +61,19 @@ export class AuthService {
       return of(false);
     }
 
+    if (this.isAuthenticated() && this.tokenSvc.accessToken) {
+      return of(true);
+    }
+
     return this.httpClient
-      .post<IApiResponse<any>>('http://localhost:3000/v1/auth/refresh-token', {
-        refreshToken,
-      })
+      .post<IApiResponse<IRefreshTokenResponse>>(
+        'http://localhost:3000/v1/auth/refresh-token',
+        {
+          refreshToken,
+        },
+      )
       .pipe(
-        switchMap((res: IApiResponse<any>) => {
+        switchMap((res: IApiResponse<IRefreshTokenResponse>) => {
           if (res.data.user) {
             this.isAuthenticated.set(true);
             this.userSvc.user.set(res.data.user);
@@ -84,8 +96,32 @@ export class AuthService {
       );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  register(): void {}
+  register(
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) {
+    return this.httpClient
+      .post<IApiResponse<IRegisterResponse>>(
+        'http://localhost:3000/v1/auth/register',
+        {
+          name,
+          email,
+          password,
+          confirmPassword,
+        },
+      )
+      .pipe(
+        switchMap((res: IApiResponse<IRegisterResponse>) => {
+          this.router.navigateByUrl('/auth/login');
+          return of(res);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error);
+        }),
+      );
+  }
 
   logout(): void {
     this.clearSession();
