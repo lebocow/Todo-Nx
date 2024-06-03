@@ -71,3 +71,24 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
     data: { user, accessToken },
   });
 });
+
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+
+  const refreshTokenData = await tokenService.verifyToken(
+    refreshToken,
+    TokenType.REFRESH,
+  );
+
+  if (!refreshTokenData) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Invalid refresh token',
+    });
+  }
+
+  await authService.logout(refreshToken);
+
+  return res.status(httpStatus.OK).json({
+    message: 'Logout successful',
+  });
+});

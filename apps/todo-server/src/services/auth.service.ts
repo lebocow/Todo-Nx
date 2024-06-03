@@ -1,3 +1,4 @@
+import { refreshToken } from './../controllers/auth.controller';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
@@ -27,22 +28,40 @@ export const loginUserWithEmailAndPassword = async (
 };
 
 export const refreshAuth = async (refreshToken: string) => {
-  try {
-    const refreshTokenData = await tokenService.verifyToken(
-      refreshToken,
-      TokenType.REFRESH,
-    );
+  const refreshTokenData = await tokenService.verifyToken(
+    refreshToken,
+    TokenType.REFRESH,
+  );
 
-    const { userId } = refreshTokenData;
+  if (!refreshTokenData)
+    throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token not found');
 
-    await prisma.token.delete({
-      where: {
-        id: refreshTokenData.id,
-      },
-    });
+  const { userId } = refreshTokenData;
 
-    return tokenService.generateAuthTokens({ id: userId });
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please Authenticate');
-  }
+  await prisma.token.delete({
+    where: {
+      id: refreshTokenData.id,
+    },
+  });
+
+  return tokenService.generateAuthTokens({ id: userId });
+};
+
+export const logout = async (refreshToken: string) => {
+  const tokenToDelete = await prisma.token.findFirst({
+    where: {
+      token: refreshToken,
+      type: TokenType.REFRESH,
+      blacklisted: false,
+    },
+  });
+
+  if (!tokenToDelete)
+    throw new ApiError(httpStatus.NOT_FOUND, 'Token not found');
+
+  await prisma.token.delete({
+    where: {
+      id: tokenToDelete.id,
+    },
+  });
 };

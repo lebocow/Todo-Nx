@@ -6,7 +6,7 @@ import {
 import { inject, Injectable, signal } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
 import { IApiResponse } from '@lib/interfaces';
@@ -123,9 +123,22 @@ export class AuthService {
       );
   }
 
-  logout(): void {
-    this.clearSession();
-    this.router.navigateByUrl('/auth/login');
+  logout() {
+    this.httpClient
+      .post<IApiResponse<any>>('http://localhost:3000/v1/auth/logout', {
+        refreshToken: this.tokenSvc.refreshToken,
+      })
+      .pipe(
+        switchMap((res: IApiResponse<any>) => {
+          this.clearSession();
+          this.router.navigateByUrl('/auth/login');
+          return of(res);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error);
+        }),
+      )
+      .subscribe();
   }
 
   private clearSession(): void {

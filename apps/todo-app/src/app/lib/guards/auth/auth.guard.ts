@@ -19,29 +19,28 @@ export const authGuard = (
     const authService = inject(AuthService);
 
     return authService.refreshToken().pipe(
-      map((res: boolean) => {
-        if (
-          options.requiresAuthentication &&
-          (authService.isAuthenticated() || res)
-        ) {
-          return true;
-        }
-
+      map((isAuthenticated: boolean) => {
         const currentUrl = segments.map((s) => s.path).join('/');
         const isAuthPage =
           currentUrl === 'auth/login' || currentUrl === 'auth/register';
 
-        if (isAuthPage) {
-          return true; // Allow access to the login page
+        if (isAuthenticated && options.requiresAuthentication) {
+          return true;
         }
 
-        return options.requiresAuthentication
-          ? router.createUrlTree(['/auth/login'], {
-              queryParams: {
-                returnUrl: currentUrl,
-              },
-            })
-          : router.createUrlTree(['/']);
+        if (isAuthPage && !isAuthenticated) {
+          return true;
+        }
+
+        if (options.requiresAuthentication && !isAuthenticated) {
+          return router.createUrlTree(['/auth/login'], {
+            queryParams: {
+              returnUrl: currentUrl,
+            },
+          });
+        }
+
+        return router.createUrlTree(['/']);
       }),
     );
   };

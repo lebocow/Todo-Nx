@@ -50,7 +50,7 @@ export class TokenService {
   }
 
   clear(): void {
-    this.cookieSvc.delete('accessToken');
-    this.cookieSvc.delete('refreshToken');
+    this.cookieSvc.delete('accessToken', '/');
+    this.cookieSvc.delete('refreshToken', '/');
   }
 }

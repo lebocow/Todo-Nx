@@ -5,7 +5,7 @@
 <mat-toolbar color="primary">
   @if (breakpointSvc.isSmall() || breakpointSvc.isXSmall()) {
     <button
-      (click)="toggleSidenav()"
+      (click)="onToggleSidenav()"
       type="button"
       aria-label="Toggle sidenav"
       mat-icon-button
@@ -13,5 +13,18 @@
       <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
     </button>
   }
-  <span>todo-app</span>
+  <mat-menu #appMenu="matMenu">
+    <ng-template matMenuContent>
+      <button mat-menu-item>Profile</button>
+      <button mat-menu-item>Settings</button>
+      <button (click)="onLogout()" mat-menu-item>Log Out</button>
+    </ng-template>
+  </mat-menu>
+
+  <div class="user__info" [matMenuTriggerFor]="appMenu">
+    <ngx-avatars [name]="userSvc.user()?.name" size="35"></ngx-avatars>
+    <span>
+      {{ userSvc.user()?.name }}
+    </span>
+  </div>
 </mat-toolbar>
