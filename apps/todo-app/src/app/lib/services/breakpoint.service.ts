@@ -1,11 +1,10 @@
-import { effect, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import {
   BreakpointObserver,
   Breakpoints,
   BreakpointState,
 } from '@angular/cdk/layout';
 import {
-  debounceTime,
   distinctUntilChanged,
   map,
   shareReplay,
@@ -36,6 +35,33 @@ export class BreakpointService {
     [Breakpoints.TabletLandscape]: 'TabletLandscape',
     [Breakpoints.WebLandscape]: 'WebLandscape',
   };
+
+  readonly isSmall = computed(() => this.breakpoints()?.['Small'] || false);
+  readonly isXSmall = computed(() => this.breakpoints()?.['XSmall'] || false);
+  readonly isMedium = computed(() => this.breakpoints()?.['Medium'] || false);
+  readonly isLarge = computed(() => this.breakpoints()?.['Large'] || false);
+  readonly isXLarge = computed(() => this.breakpoints()?.['XLarge'] || false);
+  readonly isHandset = computed(() => this.breakpoints()?.['Handset'] || false);
+  readonly isTablet = computed(() => this.breakpoints()?.['Tablet'] || false);
+  readonly isWeb = computed(() => this.breakpoints()?.['Web'] || false);
+  readonly isHandsetPortrait = computed(
+    () => this.breakpoints()?.['HandsetPortrait'] || false,
+  );
+  readonly isTabletPortrait = computed(
+    () => this.breakpoints()?.['TabletPortrait'] || false,
+  );
+  readonly isWebPortrait = computed(
+    () => this.breakpoints()?.['WebPortrait'] || false,
+  );
+  readonly isHandsetLandscape = computed(
+    () => this.breakpoints()?.['HandsetLandscape'] || false,
+  );
+  readonly isTabletLandscape = computed(
+    () => this.breakpoints()?.['TabletLandscape'] || false,
+  );
+  readonly isWebLandscape = computed(
+    () => this.breakpoints()?.['WebLandscape'] || false,
+  );
 
   readonly breakpoints = toSignal(
     this.breakpointObserver.observe(Object.values(Breakpoints)).pipe(

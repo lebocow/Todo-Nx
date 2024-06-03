@@ -3,10 +3,7 @@
 </app-sidenav>
 
 <mat-toolbar color="primary">
-  @if (
-    breakpointSvc.breakpoints()?.['Small'] ||
-    breakpointSvc.breakpoints()?.['XSmall']
-  ) {
+  @if (breakpointSvc.isSmall() || breakpointSvc.isXSmall()) {
     <button
       (click)="toggleSidenav()"
       type="button"

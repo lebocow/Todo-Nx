@@ -229,14 +229,17 @@ export * from './sidenav/sidenav.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
-<app-sidenav #drawer [isHandset]="isHandset()">
+<app-sidenav>
   <ng-content />
 </app-sidenav>
 
 <mat-toolbar color="primary">
-  @if (isHandset()) {
+  @if (
+    breakpointSvc.breakpoints()?.['Small'] ||
+    breakpointSvc.breakpoints()?.['XSmall']
+  ) {
     <button
-      (click)="drawer.toggleDrawer()"
+      (click)="toggleSidenav()"
       type="button"
       aria-label="Toggle sidenav"
       mat-icon-button
@@ -258,7 +261,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.ts
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -267,6 +270,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
+
+import { BreakpointService } from '@lib/services/breakpoint.service';
+import { SidenavService } from '@lib/services/sidenav.service';
 
 @Component({
   selector: 'app-navbar',
@@ -286,7 +292,12 @@ import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
   ],
 })
 export class NavbarComponent {
-  isHandset = input.required<boolean | null>();
+  public readonly breakpointSvc = inject(BreakpointService);
+  private readonly sidenavSvc = inject(SidenavService);
+
+  toggleSidenav() {
+    this.sidenavSvc.toggleSideNav();
+  }
 }
 
 
@@ -295,9 +306,25 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   <mat-sidenav
     class="sidenav"
     #drawer
-    [mode]="isHandset() ? 'over' : 'side'"
-    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
-    [opened]="isSideNavOpen() || !isHandset()"
+    [mode]="
+      breakpointSvc.breakpoints()?.['Small'] ||
+      breakpointSvc.breakpoints()?.['XSmall']
+        ? 'over'
+        : 'side'
+    "
+    [attr.role]="
+      breakpointSvc.breakpoints()?.['Small'] ||
+      breakpointSvc.breakpoints()?.['XSmall']
+        ? 'dialog'
+        : 'navigation'
+    "
+    [opened]="
+      sidenavSvc.isSideNavOpen() ||
+      !(
+        breakpointSvc.breakpoints()?.['Small'] ||
+        breakpointSvc.breakpoints()?.['XSmall']
+      )
+    "
     fixedInViewport
   >
     <mat-toolbar>Menu</mat-toolbar>
@@ -373,18 +400,14 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/sidenav/sidenav.component.ts
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { BreakpointService } from '@lib/services/breakpoint.service';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatListItem, MatNavList } from '@angular/material/list';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { SidenavService } from '@lib/services/sidenav.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -403,15 +426,8 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidenavComponent {
-  isHandset = input.required<boolean | null>();
-
-  drawer = viewChild.required<MatSidenav>('drawer');
-
-  isSideNavOpen = signal(false);
-
-  toggleDrawer() {
-    this.isSideNavOpen.update((state) => !state);
-  }
+  readonly breakpointSvc = inject(BreakpointService);
+  readonly sidenavSvc = inject(SidenavService);
 }
 
 
@@ -588,19 +604,12 @@ import {
 import { inject, Injectable, signal } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {
-  catchError,
-  Observable,
-  of,
-  switchMap,
-  throttleTime,
-  throwError,
-} from 'rxjs';
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
 import { IApiResponse } from '@lib/interfaces';
 import { TokenType } from '@prisma/client';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -725,9 +734,83 @@ export class AuthService {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/breakpoint.service.ts
+import { inject, Injectable } from '@angular/core';
+import {
+  BreakpointObserver,
+  Breakpoints,
+  BreakpointState,
+} from '@angular/cdk/layout';
+import {
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  startWith,
+} from 'rxjs/operators';
+
+import { toSignal } from '@angular/core/rxjs-interop';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class BreakpointService {
+  private breakpointObserver = inject(BreakpointObserver);
+
+  private readonly mediaQueryToBreakpointName: { [key: string]: string } = {
+    [Breakpoints.XSmall]: 'XSmall',
+    [Breakpoints.Small]: 'Small',
+    [Breakpoints.Medium]: 'Medium',
+    [Breakpoints.Large]: 'Large',
+    [Breakpoints.XLarge]: 'XLarge',
+    [Breakpoints.Handset]: 'Handset',
+    [Breakpoints.Tablet]: 'Tablet',
+    [Breakpoints.Web]: 'Web',
+    [Breakpoints.HandsetPortrait]: 'HandsetPortrait',
+    [Breakpoints.TabletPortrait]: 'TabletPortrait',
+    [Breakpoints.WebPortrait]: 'WebPortrait',
+    [Breakpoints.HandsetLandscape]: 'HandsetLandscape',
+    [Breakpoints.TabletLandscape]: 'TabletLandscape',
+    [Breakpoints.WebLandscape]: 'WebLandscape',
+  };
+
+  readonly breakpoints = toSignal(
+    this.breakpointObserver.observe(Object.values(Breakpoints)).pipe(
+      startWith({ matches: false, breakpoints: {} }),
+      map((result: BreakpointState) => {
+        const breakpointMatches: { [key: string]: boolean } = {};
+
+        for (const query of Object.keys(result.breakpoints)) {
+          const breakpointName = this.mediaQueryToBreakpointName[query];
+          breakpointMatches[breakpointName] = result.breakpoints[query];
+        }
+
+        return breakpointMatches;
+      }),
+      distinctUntilChanged(),
+      shareReplay(1),
+    ),
+  );
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/index.ts
 export * from './auth.service';
 export * from './token.service';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/sidenav.service.ts
+import { Injectable, signal } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class SidenavService {
+  readonly isSideNavOpen = signal(false);
+
+  toggleSideNav(): void {
+    this.isSideNavOpen.set(!this.isSideNavOpen());
+  }
+}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/token.service.ts
@@ -760,7 +843,7 @@ export class TokenService {
     );
   }
 
-  setToken(token: string, type: TokenType, expires: number) {
+  setToken(token: string, type: TokenType, expires: number): void {
     const cookieName = this.getCookieName(type);
 
     this.cookieSvc.set(cookieName, token, {
@@ -943,7 +1026,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: var(--main-color)
+  background: rgba(var(--main-color));
 }
 
 .container {
@@ -952,7 +1035,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   justify-content: space-between;
   width: 50rem;
   border-radius: 0.5rem;
-  background: var(--white-color);
+  background: rgba(var(--white-color));
 
   &__info {
     display: flex;
@@ -960,8 +1043,8 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     flex-direction: column;
     justify-content: center;
     padding: 2rem;
-    color: var(--white-color);
-    background: var(--secondary-color)
+    color: rgba(var(--white-color));
+    background: rgba(var(--secondary-color));
   }
 
   &__form {
@@ -973,7 +1056,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     &__title {
       margin-top: 0;
       text-align: center;
-      color: var(--main-color);
+      color: rgba(var(--main-color));
     }
   }
 }
@@ -1172,7 +1255,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  background: var(--main-color)
+  background: rgba(var(--main-color));
 }
 
 .container {
@@ -1181,7 +1264,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   justify-content: space-between;
   width: 50rem;
   border-radius: 0.5rem;
-  background: var(--white-color);
+  background: rgba(var(--white-color));
 
   &__info {
     display: flex;
@@ -1189,8 +1272,8 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     flex-direction: column;
     justify-content: center;
     padding: 2rem;
-    color: var(--white-color);
-    background: var(--secondary-color)
+    color: rgba(var(--white-color));
+    background: rgba(var(--secondary-color));
   }
 
   &__form {
@@ -1201,7 +1284,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     &__title {
       text-align: center;
-      color: var(--main-color);
+      color: rgba(var(--main-color));
     }
   }
 }
@@ -1297,7 +1380,7 @@ export class RegisterComponent {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.html
-<app-navbar [isHandset]="isHandset$ | async">
+<app-navbar>
   <router-outlet></router-outlet>
 </app-navbar>
 
@@ -1306,14 +1389,11 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.ts
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { map, shareReplay } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+
 import { RouterOutlet } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-dashboard',
@@ -1323,17 +1403,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {
-  private readonly breakpointObserver = inject(BreakpointObserver);
-
-  isHandset$: Observable<boolean> = this.breakpointObserver
-    .observe(Breakpoints.Handset)
-    .pipe(
-      map((result) => result.matches),
-      shareReplay(1),
-      takeUntilDestroyed(),
-    );
-}
+export class DashboardComponent {}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/done/done.component.html
@@ -1656,179 +1726,6 @@ export default {
   coverageDirectory: '../../coverage/apps/todo-server',
 };
 
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419080108_init/migration.sql
--- CreateTable
-CREATE TABLE "Post" (
-    "id" SERIAL NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "title" VARCHAR(255) NOT NULL,
-    "content" TEXT,
-    "published" BOOLEAN NOT NULL DEFAULT false,
-    "authorId" INTEGER NOT NULL,
-
-    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Profile" (
-    "id" SERIAL NOT NULL,
-    "bio" TEXT,
-    "userId" INTEGER NOT NULL,
-
-    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
-    "email" TEXT NOT NULL,
-    "name" TEXT,
-
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- AddForeignKey
-ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419083352_init/migration.sql
-/*
-  Warnings:
-
-  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `password` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updatedAt` to the `User` table without a default value. This is not possible if the table is not empty.
-
-*/
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
-
--- AlterTable
-ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "password" VARCHAR(255) NOT NULL,
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "User_id_seq";
-
--- DropTable
-DROP TABLE "Post";
-
--- DropTable
-DROP TABLE "Profile";
-
--- CreateTable
-CREATE TABLE "Task" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "title" VARCHAR(255) NOT NULL,
-    "description" TEXT,
-    "dueDate" TIMESTAMP(3),
-    "completed" BOOLEAN NOT NULL DEFAULT false,
-    "categoryId" TEXT,
-    "userId" TEXT NOT NULL,
-
-    CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Category" (
-    "id" TEXT NOT NULL,
-    "name" VARCHAR(255) NOT NULL,
-
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
-);
-
--- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419085235_init/migration.sql
-/*
-  Warnings:
-
-  - Made the column `categoryId` on table `Task` required. This step will fail if there are existing NULL values in that column.
-
-*/
--- DropForeignKey
-ALTER TABLE "Task" DROP CONSTRAINT "Task_categoryId_fkey";
-
--- AlterTable
-ALTER TABLE "Task" ALTER COLUMN "categoryId" SET NOT NULL;
-
--- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240425085502_init/migration.sql
-/*
-  Warnings:
-
-  - Made the column `name` on table `User` required. This step will fail if there are existing NULL values in that column.
-
-*/
--- CreateEnum
-CREATE TYPE "TokenType" AS ENUM ('ACCESS', 'REFRESH', 'RESET_PASSWORD', 'VERIFY_EMAIL');
-
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "name" SET NOT NULL;
-
--- CreateTable
-CREATE TABLE "Token" (
-    "id" SERIAL NOT NULL,
-    "token" TEXT NOT NULL,
-    "type" "TokenType" NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
-    "blacklisted" BOOLEAN NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT NOT NULL,
-
-    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
-);
-
--- AddForeignKey
-ALTER TABLE "Token" ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240430130308_init/migration.sql
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
-
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER';
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240521081151_init/migration.sql
--- AlterTable
-ALTER TABLE "Token" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/migration_lock.toml
-# Please do not edit this file manually
-# It should be added in your version-control system (i.e. Git)
-provider = "postgresql"
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/schema.prisma
 // This is your Prisma schema file,

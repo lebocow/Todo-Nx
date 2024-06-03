@@ -1,10 +1,5 @@
 import { BreakpointService } from '@lib/services/breakpoint.service';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatListItem, MatNavList } from '@angular/material/list';
@@ -29,6 +24,6 @@ import { SidenavService } from '@lib/services/sidenav.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidenavComponent {
-  breakpointSvc = inject(BreakpointService);
-  sidenavSvc = inject(SidenavService);
+  readonly breakpointSvc = inject(BreakpointService);
+  readonly sidenavSvc = inject(SidenavService);
 }

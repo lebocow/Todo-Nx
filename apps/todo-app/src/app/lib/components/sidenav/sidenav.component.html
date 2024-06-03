@@ -3,23 +3,16 @@
     class="sidenav"
     #drawer
     [mode]="
-      breakpointSvc.breakpoints()?.['Small'] ||
-      breakpointSvc.breakpoints()?.['XSmall']
-        ? 'over'
-        : 'side'
+      breakpointSvc.isSmall() || breakpointSvc.isXSmall() ? 'over' : 'side'
     "
     [attr.role]="
-      breakpointSvc.breakpoints()?.['Small'] ||
-      breakpointSvc.breakpoints()?.['XSmall']
+      breakpointSvc.isSmall() || breakpointSvc.isXSmall()
         ? 'dialog'
         : 'navigation'
     "
     [opened]="
       sidenavSvc.isSideNavOpen() ||
-      !(
-        breakpointSvc.breakpoints()?.['Small'] ||
-        breakpointSvc.breakpoints()?.['XSmall']
-      )
+      !(breakpointSvc.isSmall() || breakpointSvc.isXSmall())
     "
     fixedInViewport
   >
