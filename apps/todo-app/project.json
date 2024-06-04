@@ -8,15 +8,22 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/todo-app",
         "index": "apps/todo-app/src/index.html",
         "browser": "apps/todo-app/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/todo-app/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": ["apps/todo-app/src/favicon.ico", "apps/todo-app/src/assets"],
+        "assets": [
+          "apps/todo-app/src/favicon.ico",
+          "apps/todo-app/src/assets"
+        ],
         "styles": [
           "apps/todo-app/src/styles.scss",
           "node_modules/ngx-toastr/toastr.css"
@@ -42,7 +49,13 @@
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/todo-app/src/environments/environment.ts",
+              "with": "apps/todo-app/src/environments/environment.development.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "production"
@@ -73,7 +86,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/todo-app/jest.config.ts"
       }

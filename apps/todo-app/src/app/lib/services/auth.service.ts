@@ -1,3 +1,4 @@
+import { environment } from './../../../environments/environment';
 import {
   ILoginResponse,
   IRefreshTokenResponse,
@@ -6,7 +7,7 @@ import {
 import { inject, Injectable, signal } from '@angular/core';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
 import { IApiResponse } from '@lib/interfaces';
@@ -30,13 +31,10 @@ export class AuthService {
     password: string,
   ): Observable<IApiResponse<ILoginResponse>> {
     return this.httpClient
-      .post<IApiResponse<ILoginResponse>>(
-        'http://localhost:3000/v1/auth/login',
-        {
-          email,
-          password,
-        },
-      )
+      .post<IApiResponse<ILoginResponse>>(`${environment.apiUrl}/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
         switchMap((res: IApiResponse<ILoginResponse>) => {
           const { tokens, user } = res.data;
@@ -67,7 +65,7 @@ export class AuthService {
 
     return this.httpClient
       .post<IApiResponse<IRefreshTokenResponse>>(
-        'http://localhost:3000/v1/auth/refresh-token',
+        `${environment.apiUrl}/auth/refresh-token`,
         {
           refreshToken,
         },
@@ -104,7 +102,7 @@ export class AuthService {
   ) {
     return this.httpClient
       .post<IApiResponse<IRegisterResponse>>(
-        'http://localhost:3000/v1/auth/register',
+        `${environment.apiUrl}/auth/register`,
         {
           name,
           email,
@@ -125,7 +123,7 @@ export class AuthService {
 
   logout() {
     this.httpClient
-      .post<IApiResponse<any>>('http://localhost:3000/v1/auth/logout', {
+      .post<IApiResponse<any>>(`${environment.apiUrl}/auth/logout`, {
         refreshToken: this.tokenSvc.refreshToken,
       })
       .pipe(
