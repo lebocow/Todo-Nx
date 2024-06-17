@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.categories-list {
+  &__item {
+    &__color {
+      justify-self: center;
+      background-color: red;
+      width: 0.75rem;
+      height: 1.25rem;
+    }
+
+    &__text {
+      grid-column: 3/5;
+
+      &--new {
+        opacity: 0.5;
+      }
+    }
+  }
+}

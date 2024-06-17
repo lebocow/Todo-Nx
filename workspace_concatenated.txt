@@ -107,7 +107,13 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/project.
         "development": {
           "optimization": false,
           "extractLicenses": false,
-          "sourceMap": true
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/todo-app/src/environments/environment.ts",
+              "with": "apps/todo-app/src/environments/environment.development.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "production"
@@ -180,13 +186,14 @@ export class AppComponent {}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.config.ts
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { jwtInterceptor, serverErrorInterceptor } from '@lib/interceptors';
 import { provideToastr } from 'ngx-toastr';
+import { AvatarModule } from 'ngx-avatars';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -199,6 +206,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([jwtInterceptor, serverErrorInterceptor]),
     ),
     provideToastr(),
+    importProvidersFrom(AvatarModule.forRoot()),
   ],
 };
 
@@ -223,9 +231,71 @@ export const appRoutes: Route[] = [
 ];
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/categories-list/categories-list.component.html
+<mat-nav-list class="categories-list">
+  <a class="categories-list__item" mat-list-item>
+    <div class="categories-list__item__color"></div>
+    <span class="categories-list__item__text">Project</span>
+  </a>
+  <a class="categories-list__item" mat-list-item>
+    <div class="categories-list__item__color"></div>
+    <span class="categories-list__item__text categories-list__item__text--new"
+      >New Tag</span
+    >
+  </a>
+</mat-nav-list>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/categories-list/categories-list.component.scss
+:host {
+  display: block;
+}
+
+.categories-list {
+  &__item {
+    &__color {
+      justify-self: center;
+      background-color: red;
+      width: 0.75rem;
+      height: 1.25rem;
+    }
+
+    &__text {
+      grid-column: 3/5;
+
+      &--new {
+        opacity: 0.5;
+      }
+    }
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/categories-list/categories-list.component.ts
+import { MatListModule } from '@angular/material/list';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { ICategory } from '@myworkspace/data-models';
+
+@Component({
+  selector: 'app-categories-list',
+  standalone: true,
+  imports: [CommonModule, MatSidenavModule, MatListModule],
+  templateUrl: './categories-list.component.html',
+  styleUrl: './categories-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CategoriesListComponent {
+  category = input<ICategory>();
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
 export * from './navbar/navbar.component';
 export * from './sidenav/sidenav.component';
+export * from './task-card/task-card.component';
+export * from './categories-list/categories-list.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
@@ -234,12 +304,9 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 </app-sidenav>
 
 <mat-toolbar color="primary">
-  @if (
-    breakpointSvc.breakpoints()?.['Small'] ||
-    breakpointSvc.breakpoints()?.['XSmall']
-  ) {
+  @if (breakpointSvc.isSmall() || breakpointSvc.isXSmall()) {
     <button
-      (click)="toggleSidenav()"
+      (click)="onToggleSidenav()"
       type="button"
       aria-label="Toggle sidenav"
       mat-icon-button
@@ -247,7 +314,20 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
       <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
     </button>
   }
-  <span>todo-app</span>
+  <mat-menu #appMenu="matMenu">
+    <ng-template matMenuContent>
+      <button mat-menu-item>Profile</button>
+      <button mat-menu-item>Settings</button>
+      <button (click)="onLogout()" mat-menu-item>Log Out</button>
+    </ng-template>
+  </mat-menu>
+
+  <div class="user__info" [matMenuTriggerFor]="appMenu">
+    <ngx-avatars [name]="userSvc.user()?.name" size="35"></ngx-avatars>
+    <span>
+      {{ userSvc.user()?.name }}
+    </span>
+  </div>
 </mat-toolbar>
 
 
@@ -256,7 +336,23 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   position: absolute;
   z-index: 1;
   bottom: 0;
-  height: 4rem;
+}
+
+.user {
+  &__info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.7rem;
+    height: min-content;
+    padding: 0.4rem;
+
+    &:hover {
+      cursor: pointer;
+      background-color: #218a95;
+      border-radius: 0.3rem;
+    }
+  }
 }
 
 
@@ -270,9 +366,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
-
+import { MatMenuModule } from '@angular/material/menu';
 import { BreakpointService } from '@lib/services/breakpoint.service';
 import { SidenavService } from '@lib/services/sidenav.service';
+import { AvatarModule } from 'ngx-avatars';
+import { UserService } from '@lib/services/user.service';
+import { AuthService } from '@lib/services';
 
 @Component({
   selector: 'app-navbar',
@@ -289,14 +388,23 @@ import { SidenavService } from '@lib/services/sidenav.service';
     AsyncPipe,
     RouterLink,
     SidenavComponent,
+    MatMenuModule,
+    AvatarModule,
   ],
 })
 export class NavbarComponent {
-  public readonly breakpointSvc = inject(BreakpointService);
+  readonly breakpointSvc = inject(BreakpointService);
+  readonly userSvc = inject(UserService);
+  readonly authSvc = inject(AuthService);
+
   private readonly sidenavSvc = inject(SidenavService);
 
-  toggleSidenav() {
+  onToggleSidenav() {
     this.sidenavSvc.toggleSideNav();
+  }
+
+  onLogout() {
+    this.authSvc.logout();
   }
 }
 
@@ -307,67 +415,67 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     class="sidenav"
     #drawer
     [mode]="
-      breakpointSvc.breakpoints()?.['Small'] ||
-      breakpointSvc.breakpoints()?.['XSmall']
-        ? 'over'
-        : 'side'
+      breakpointSvc.isSmall() || breakpointSvc.isXSmall() ? 'over' : 'side'
     "
     [attr.role]="
-      breakpointSvc.breakpoints()?.['Small'] ||
-      breakpointSvc.breakpoints()?.['XSmall']
+      breakpointSvc.isSmall() || breakpointSvc.isXSmall()
         ? 'dialog'
         : 'navigation'
     "
     [opened]="
       sidenavSvc.isSideNavOpen() ||
-      !(
-        breakpointSvc.breakpoints()?.['Small'] ||
-        breakpointSvc.breakpoints()?.['XSmall']
-      )
+      !(breakpointSvc.isSmall() || breakpointSvc.isXSmall())
     "
     fixedInViewport
   >
-    <mat-toolbar>Menu</mat-toolbar>
-    <mat-nav-list class="sidenav-list">
+    <mat-toolbar class="sidenav__toolbar">Menu</mat-toolbar>
+    <mat-nav-list class="sidenav__list">
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         mat-list-item
-        color="primary"
         routerLinkActive="active-link"
         routerLink="/"
       >
         <mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="calendar_today"
         />
-        <span>Recent</span>
+        <span class="sidenav__list__item__text">Recent</span>
       </a>
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         mat-list-item
         routerLinkActive="active-link"
         routerLink="/done"
         ><mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="event_available"
-        />Done</a
+        /><span class="sidenav__list__item__text">Done</span></a
       >
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="active-link"
         routerLink="/inbox"
         mat-list-item
         ><mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="inbox"
-        />Inbox</a
+        /><span class="sidenav__list__item__text">Inbox</span></a
       >
     </mat-nav-list>
+    <app-categories-list class="sidenav__categories-list" />
   </mat-sidenav>
-  <mat-sidenav-content>
+
+  <mat-sidenav-content class="sidenav-content">
     <ng-content />
   </mat-sidenav-content>
 </mat-sidenav-container>
@@ -381,19 +489,35 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     width: 200px;
     height: calc(100vh - 4rem);
 
-    .mat-toolbar {
+    &__toolbar {
       background: inherit;
     }
 
     .active-link {
-      background: rgba(var(--secondary-color), 0.8);
+      background: rgba(var(--secondary-color), 0.2);
     }
 
     &::ng-deep.mdc-list-item__primary-text {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       align-items: center;
-      gap: 1rem;
+
       font-size: 1.1rem;
+    }
+
+    &__list {
+      &__item {
+        &__icon {
+          justify-self: center;
+        }
+        &__text {
+          grid-column: 3 / 5;
+        }
+      }
+    }
+
+    &__categories-list {
+      margin-top: 2rem;
     }
   }
 }
@@ -404,30 +528,218 @@ import { BreakpointService } from '@lib/services/breakpoint.service';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
-import { MatListItem, MatNavList } from '@angular/material/list';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatListModule } from '@angular/material/list';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { SidenavService } from '@lib/services/sidenav.service';
+import { CategoriesListComponent } from '@lib/components';
 
 @Component({
   selector: 'app-sidenav',
   standalone: true,
-  imports: [
-    MatSidenavModule,
-    MatToolbar,
-    MatNavList,
-    MatListItem,
-    RouterLink,
-    RouterLinkActive,
-    MatIconModule,
-  ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatSidenavModule,
+    MatToolbar,
+    RouterModule,
+    MatIconModule,
+    CategoriesListComponent,
+    MatListModule,
+  ],
 })
 export class SidenavComponent {
   readonly breakpointSvc = inject(BreakpointService);
   readonly sidenavSvc = inject(SidenavService);
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-card/task-card.component.html
+<mat-drawer-container class="task-card">
+  <mat-drawer class="task-card__menu" #drawer mode="side">
+    <div class="icon-group">
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >edit</mat-icon
+      >
+
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >delete</mat-icon
+      >
+
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >center_focus_strong</mat-icon
+      >
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="task-card__content">
+    <div
+      class="task-card__content__bar"
+      #bar
+      (clickOutside)="onCloseDrawer()"
+      (click)="onOpenDrawer()"
+    ></div>
+    <input class="task-card__content__checkbox" type="checkbox" />
+
+    <p class="task-card__content__date">14:15</p>
+    <p class="task-card__content__title">Presentation title</p>
+    <p class="task-card__content__description">Blah blah</p>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-card/task-card.component.scss
+.task-card {
+  background-color: rgba(var(--white-color));
+  box-shadow: var(--shadow-xl);
+
+  .icon-group {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgba(var(--main-color));
+
+    &__icon {
+      cursor: pointer;
+      color: rgba(var(--secondary-color));
+    }
+  }
+
+  &__menu {
+    width: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--secondary-color);
+    border: 0;
+  }
+
+  &__content {
+    padding: 1rem 2rem 1rem;
+    transition-duration: 400ms;
+    transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    :has(mat-drawer.mat-drawer-opened) & {
+      padding: 1rem;
+    }
+
+    &__bar {
+      width: 1rem;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      background-color: red;
+      transition-duration: 400ms;
+      transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+      :has(mat-drawer.mat-drawer-opened) & {
+        width: 0px;
+      }
+    }
+
+    &__checkbox {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      width: 2rem;
+      height: 2rem;
+      background-color: green;
+      cursor: pointer;
+    }
+
+    &__date {
+    }
+
+    &__title {
+    }
+
+    &__description {
+    }
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-card/task-card.component.ts
+import { MatIconModule } from '@angular/material/icon';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  NgZone,
+  viewChild,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
+import { ITask } from '@myworkspace/data-models';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { ClickOutside } from 'ngxtension/click-outside';
+
+@Component({
+  selector: 'app-task-card',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatSidenavModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+    ClickOutside,
+  ],
+  templateUrl: './task-card.component.html',
+  styleUrl: './task-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TaskCardComponent {
+  private readonly ngzone = inject(NgZone);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  private readonly drawer = viewChild.required<MatDrawer>('drawer');
+  private readonly bar = viewChild.required<ElementRef<HTMLDivElement>>('bar');
+
+  readonly task = input<ITask>();
+
+  private hoverTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  @HostListener('mouseover', ['$event'])
+  onMouseOver(event: MouseEvent) {
+    if (this.bar().nativeElement === event.target) {
+      this.ngzone.runOutsideAngular(() => {
+        this.hoverTimeout = setTimeout(() => {
+          this.drawer().open();
+          this.cdRef.detectChanges();
+        }, 500);
+      });
+    }
+  }
+
+  @HostListener('mouseleave', ['$event'])
+  onMouseLeave(event: MouseEvent) {
+    this.ngzone.runOutsideAngular(() => {
+      clearTimeout(this.hoverTimeout);
+      setTimeout(() => {
+        this.drawer().close();
+        this.cdRef.detectChanges();
+      }, 1000);
+    });
+  }
+
+  onOpenDrawer() {
+    this.drawer().open();
+    clearTimeout(this.hoverTimeout);
+  }
+
+  onCloseDrawer() {
+    this.drawer().close();
+  }
 }
 
 
@@ -453,29 +765,28 @@ export const authGuard = (
     const authService = inject(AuthService);
 
     return authService.refreshToken().pipe(
-      map((res: boolean) => {
-        if (
-          options.requiresAuthentication &&
-          (authService.isAuthenticated() || res)
-        ) {
-          return true;
-        }
-
+      map((isAuthenticated: boolean) => {
         const currentUrl = segments.map((s) => s.path).join('/');
         const isAuthPage =
           currentUrl === 'auth/login' || currentUrl === 'auth/register';
 
-        if (isAuthPage) {
-          return true; // Allow access to the login page
+        if (isAuthenticated && options.requiresAuthentication) {
+          return true;
         }
 
-        return options.requiresAuthentication
-          ? router.createUrlTree(['/auth/login'], {
-              queryParams: {
-                returnUrl: currentUrl,
-              },
-            })
-          : router.createUrlTree(['/']);
+        if (isAuthPage && !isAuthenticated) {
+          return true;
+        }
+
+        if (options.requiresAuthentication && !isAuthenticated) {
+          return router.createUrlTree(['/auth/login'], {
+            queryParams: {
+              returnUrl: currentUrl,
+            },
+          });
+        }
+
+        return router.createUrlTree(['/']);
       }),
     );
   };
@@ -596,6 +907,7 @@ export interface IApiResponse<T> {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/auth.service.ts
+import { environment } from './../../../environments/environment';
 import {
   ILoginResponse,
   IRefreshTokenResponse,
@@ -628,13 +940,10 @@ export class AuthService {
     password: string,
   ): Observable<IApiResponse<ILoginResponse>> {
     return this.httpClient
-      .post<IApiResponse<ILoginResponse>>(
-        'http://localhost:3000/v1/auth/login',
-        {
-          email,
-          password,
-        },
-      )
+      .post<IApiResponse<ILoginResponse>>(`${environment.apiUrl}/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
         switchMap((res: IApiResponse<ILoginResponse>) => {
           const { tokens, user } = res.data;
@@ -665,7 +974,7 @@ export class AuthService {
 
     return this.httpClient
       .post<IApiResponse<IRefreshTokenResponse>>(
-        'http://localhost:3000/v1/auth/refresh-token',
+        `${environment.apiUrl}/auth/refresh-token`,
         {
           refreshToken,
         },
@@ -702,7 +1011,7 @@ export class AuthService {
   ) {
     return this.httpClient
       .post<IApiResponse<IRegisterResponse>>(
-        'http://localhost:3000/v1/auth/register',
+        `${environment.apiUrl}/auth/register`,
         {
           name,
           email,
@@ -721,9 +1030,22 @@ export class AuthService {
       );
   }
 
-  logout(): void {
-    this.clearSession();
-    this.router.navigateByUrl('/auth/login');
+  logout() {
+    this.httpClient
+      .post<IApiResponse<any>>(`${environment.apiUrl}/auth/logout`, {
+        refreshToken: this.tokenSvc.refreshToken,
+      })
+      .pipe(
+        switchMap((res: IApiResponse<any>) => {
+          this.clearSession();
+          this.router.navigateByUrl('/auth/login');
+          return of(res);
+        }),
+        catchError((error: HttpErrorResponse) => {
+          return throwError(() => error);
+        }),
+      )
+      .subscribe();
   }
 
   private clearSession(): void {
@@ -735,7 +1057,7 @@ export class AuthService {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/breakpoint.service.ts
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import {
   BreakpointObserver,
   Breakpoints,
@@ -772,6 +1094,33 @@ export class BreakpointService {
     [Breakpoints.TabletLandscape]: 'TabletLandscape',
     [Breakpoints.WebLandscape]: 'WebLandscape',
   };
+
+  readonly isSmall = computed(() => this.breakpoints()?.['Small'] || false);
+  readonly isXSmall = computed(() => this.breakpoints()?.['XSmall'] || false);
+  readonly isMedium = computed(() => this.breakpoints()?.['Medium'] || false);
+  readonly isLarge = computed(() => this.breakpoints()?.['Large'] || false);
+  readonly isXLarge = computed(() => this.breakpoints()?.['XLarge'] || false);
+  readonly isHandset = computed(() => this.breakpoints()?.['Handset'] || false);
+  readonly isTablet = computed(() => this.breakpoints()?.['Tablet'] || false);
+  readonly isWeb = computed(() => this.breakpoints()?.['Web'] || false);
+  readonly isHandsetPortrait = computed(
+    () => this.breakpoints()?.['HandsetPortrait'] || false,
+  );
+  readonly isTabletPortrait = computed(
+    () => this.breakpoints()?.['TabletPortrait'] || false,
+  );
+  readonly isWebPortrait = computed(
+    () => this.breakpoints()?.['WebPortrait'] || false,
+  );
+  readonly isHandsetLandscape = computed(
+    () => this.breakpoints()?.['HandsetLandscape'] || false,
+  );
+  readonly isTabletLandscape = computed(
+    () => this.breakpoints()?.['TabletLandscape'] || false,
+  );
+  readonly isWebLandscape = computed(
+    () => this.breakpoints()?.['WebLandscape'] || false,
+  );
 
   readonly breakpoints = toSignal(
     this.breakpointObserver.observe(Object.values(Breakpoints)).pipe(
@@ -866,8 +1215,8 @@ export class TokenService {
   }
 
   clear(): void {
-    this.cookieSvc.delete('accessToken');
-    this.cookieSvc.delete('refreshToken');
+    this.cookieSvc.delete('accessToken', '/');
+    this.cookieSvc.delete('refreshToken', '/');
   }
 }
 
@@ -1488,28 +1837,109 @@ export const routes: Routes = [
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.html
-<p>recent works!</p>
+<div class="container">
+  <div class="container__section">
+    <h1 class="container__section-title">Today</h1>
+    <mat-chip-set aria-label="Fish selection">
+      <mat-chip><span>One fish</span></mat-chip>
+      <mat-chip>Two fish</mat-chip>
+      <mat-chip>Three fish</mat-chip>
+      <mat-chip>Four fish</mat-chip>
+      <mat-chip>Five fish</mat-chip>
+      <mat-chip>Six fish</mat-chip>
+      <mat-chip>Seven fish</mat-chip>
+      <mat-chip>Eight fish</mat-chip>
+      <mat-chip>Nine fish</mat-chip>
+      <mat-chip>Ten fish</mat-chip>
+      <mat-chip>Eleven fish</mat-chip>
+    </mat-chip-set>
+
+    <div class="container__section__task-list">
+      <app-task-card />
+      <app-task-card />
+    </div>
+  </div>
+
+  <div class="container__section">
+    <h1 class="container__section-title">Future</h1>
+  </div>
+</div>
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.scss
+:host {
+  height: 100%;
+  width: 100%;
+  display: block;
+  padding: 3rem;
+  background-color: rgba(var(--secondary-color), 0.05);
+}
+
+.container {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-gap: 3rem;
+
+  &__section {
+    &-title {
+      margin: 0;
+    }
+
+    mat-chip-set {
+      ::ng-deep .mdc-evolution-chip-set__chips {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: thin;
+      }
+    }
+
+    &__task-list {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.ts
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { TaskCardComponent } from '@lib/components';
 
 @Component({
   selector: 'app-recent',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './recent.component.html',
   styleUrl: './recent.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, MatChipsModule, MatSidenavModule, TaskCardComponent],
 })
 export class RecentComponent {}
 
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/assets/.gitkeep
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/environments/environment.development.ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000/v1',
+};
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/environments/environment.ts
+export const environment = {
+  production: true,
+  apiUrl: 'http://localhost:3000/v1',
+};
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/index.html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -1517,9 +1947,19 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/inde
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-</head>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+  </head>
   <body class="mat-typography">
     <app-root></app-root>
   </body>
@@ -1537,27 +1977,80 @@ bootstrapApplication(AppComponent, appConfig).catch((err) =>
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/styles.scss
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
-// Plus imports for other components in your app.
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$todo-app-primary: mat.define-palette(mat.$indigo-palette);
-$todo-app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$main-palette: (
+  50: #e4eff0,
+  100: #bcd7d9,
+  200: #90bcc0,
+  300: #64a1a7,
+  400: #428d94,
+  500: #217981,
+  600: #1d7179,
+  700: #18666e,
+  800: #145c64,
+  900: #0b4951,
+  A100: #87efff,
+  A200: #54e9ff,
+  A400: #21e2ff,
+  A700: #08dfff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
 
-// The warn palette is optional (defaults to red).
+$secondary-palette: (
+  50: #e7fbf0,
+  100: #c3f5db,
+  200: #9ceec3,
+  300: #74e7aa,
+  400: #56e298,
+  500: #38dd86,
+  600: #32d97e,
+  700: #2bd473,
+  800: #24cf69,
+  900: #17c756,
+  A100: #f9fffb,
+  A200: #c6ffd8,
+  A400: #93ffb6,
+  A700: #7affa5,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #000000,
+    800: #000000,
+    900: #000000,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$todo-app-primary: mat.define-palette($main-palette);
+$todo-app-accent: mat.define-palette($secondary-palette);
 $todo-app-warn: mat.define-palette(mat.$red-palette);
 
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
 $todo-app-theme: mat.define-light-theme(
   (
     color: (
@@ -1570,9 +2063,6 @@ $todo-app-theme: mat.define-light-theme(
   )
 );
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
 @include mat.all-component-themes($todo-app-theme);
 
 /* You can add global styles to this file, and also import other style files */
@@ -1581,6 +2071,17 @@ $todo-app-theme: mat.define-light-theme(
   --main-color: 26, 121, 130;
   --secondary-color: 41, 222, 182;
   --white-color: 249, 255, 254;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-none: 0 0 #0000;
 }
 
 * {
@@ -1727,6 +2228,204 @@ export default {
 };
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419080108_init/migration.sql
+-- CreateTable
+CREATE TABLE "Post" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "content" TEXT,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "authorId" INTEGER NOT NULL,
+
+    CONSTRAINT "Post_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Profile" (
+    "id" SERIAL NOT NULL,
+    "bio" TEXT,
+    "userId" INTEGER NOT NULL,
+
+    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Profile_userId_key" ON "Profile"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419083352_init/migration.sql
+/*
+  Warnings:
+
+  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
+  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `Profile` table. If the table is not empty, all the data it contains will be lost.
+  - Added the required column `password` to the `User` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `updatedAt` to the `User` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- DropForeignKey
+ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Profile" DROP CONSTRAINT "Profile_userId_fkey";
+
+-- AlterTable
+ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
+ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "password" VARCHAR(255) NOT NULL,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
+ALTER COLUMN "id" DROP DEFAULT,
+ALTER COLUMN "id" SET DATA TYPE TEXT,
+ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
+DROP SEQUENCE "User_id_seq";
+
+-- DropTable
+DROP TABLE "Post";
+
+-- DropTable
+DROP TABLE "Profile";
+
+-- CreateTable
+CREATE TABLE "Task" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "description" TEXT,
+    "dueDate" TIMESTAMP(3),
+    "completed" BOOLEAN NOT NULL DEFAULT false,
+    "categoryId" TEXT,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240419085235_init/migration.sql
+/*
+  Warnings:
+
+  - Made the column `categoryId` on table `Task` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- DropForeignKey
+ALTER TABLE "Task" DROP CONSTRAINT "Task_categoryId_fkey";
+
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "categoryId" SET NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240425085502_init/migration.sql
+/*
+  Warnings:
+
+  - Made the column `name` on table `User` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- CreateEnum
+CREATE TYPE "TokenType" AS ENUM ('ACCESS', 'REFRESH', 'RESET_PASSWORD', 'VERIFY_EMAIL');
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "name" SET NOT NULL;
+
+-- CreateTable
+CREATE TABLE "Token" (
+    "id" SERIAL NOT NULL,
+    "token" TEXT NOT NULL,
+    "type" "TokenType" NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "blacklisted" BOOLEAN NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Token_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Token" ADD CONSTRAINT "Token_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240430130308_init/migration.sql
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240521081151_init/migration.sql
+-- AlterTable
+ALTER TABLE "Token" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240614091606_init/migration.sql
+/*
+  Warnings:
+
+  - Added the required column `color` to the `Category` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- AlterTable
+ALTER TABLE "Category" ADD COLUMN     "color" VARCHAR(255) NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Token" ALTER COLUMN "updatedAt" DROP DEFAULT;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240614114723_init/migration.sql
+/*
+  Warnings:
+
+  - You are about to alter the column `color` on the `Category` table. The data in that column could be lost. The data in that column will be cast from `VarChar(255)` to `VarChar(7)`.
+
+*/
+-- AlterTable
+ALTER TABLE "Category" ALTER COLUMN "color" SET DATA TYPE VARCHAR(7);
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/migration_lock.toml
+# Please do not edit this file manually
+# It should be added in your version-control system (i.e. Git)
+provider = "postgresql"
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/schema.prisma
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
@@ -1784,6 +2483,7 @@ model Task {
 model Category {
   id    String @id @default(uuid())
   name  String @db.VarChar(255)
+  color String @db.VarChar(7)
   tasks Task[]
 }
 
@@ -2124,6 +2824,27 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+
+  const refreshTokenData = await tokenService.verifyToken(
+    refreshToken,
+    TokenType.REFRESH,
+  );
+
+  if (!refreshTokenData) {
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      message: 'Invalid refresh token',
+    });
+  }
+
+  await authService.logout(refreshToken);
+
+  return res.status(httpStatus.OK).json({
+    message: 'Logout successful',
+  });
+});
+
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/index.ts
 export * as authController from './auth.controller';
@@ -2335,6 +3056,8 @@ router.post('/login', authController.login);
 
 router.post('/refresh-token', authController.refreshToken);
 
+router.post('/logout', authController.logout);
+
 export default router;
 
 
@@ -2398,6 +3121,7 @@ export default router;
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/auth.service.ts
+import { refreshToken } from './../controllers/auth.controller';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
@@ -2427,24 +3151,42 @@ export const loginUserWithEmailAndPassword = async (
 };
 
 export const refreshAuth = async (refreshToken: string) => {
-  try {
-    const refreshTokenData = await tokenService.verifyToken(
-      refreshToken,
-      TokenType.REFRESH,
-    );
+  const refreshTokenData = await tokenService.verifyToken(
+    refreshToken,
+    TokenType.REFRESH,
+  );
 
-    const { userId } = refreshTokenData;
+  if (!refreshTokenData)
+    throw new ApiError(httpStatus.NOT_FOUND, 'Refresh token not found');
 
-    await prisma.token.delete({
-      where: {
-        id: refreshTokenData.id,
-      },
-    });
+  const { userId } = refreshTokenData;
 
-    return tokenService.generateAuthTokens({ id: userId });
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please Authenticate');
-  }
+  await prisma.token.delete({
+    where: {
+      id: refreshTokenData.id,
+    },
+  });
+
+  return tokenService.generateAuthTokens({ id: userId });
+};
+
+export const logout = async (refreshToken: string) => {
+  const tokenToDelete = await prisma.token.findFirst({
+    where: {
+      token: refreshToken,
+      type: TokenType.REFRESH,
+      blacklisted: false,
+    },
+  });
+
+  if (!tokenToDelete)
+    throw new ApiError(httpStatus.NOT_FOUND, 'Token not found');
+
+  await prisma.token.delete({
+    where: {
+      id: tokenToDelete.id,
+    },
+  });
 };
 
 

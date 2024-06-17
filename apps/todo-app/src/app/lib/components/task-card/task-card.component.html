@@ -1,0 +1,30 @@
+<mat-drawer-container class="task-card">
+  <mat-drawer class="task-card__menu" #drawer mode="side">
+    <div class="icon-group">
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >edit</mat-icon
+      >
+
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >delete</mat-icon
+      >
+
+      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+        >center_focus_strong</mat-icon
+      >
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="task-card__content">
+    <div
+      class="task-card__content__bar"
+      #bar
+      (clickOutside)="onCloseDrawer()"
+      (click)="onOpenDrawer()"
+    ></div>
+    <input class="task-card__content__checkbox" type="checkbox" />
+
+    <p class="task-card__content__date">14:15</p>
+    <p class="task-card__content__title">Presentation title</p>
+    <p class="task-card__content__description">Blah blah</p>
+  </mat-drawer-content>
+</mat-drawer-container>

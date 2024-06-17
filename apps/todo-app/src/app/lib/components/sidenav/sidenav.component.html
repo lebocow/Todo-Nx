@@ -16,47 +16,54 @@
     "
     fixedInViewport
   >
-    <mat-toolbar>Menu</mat-toolbar>
-    <mat-nav-list class="sidenav-list">
+    <mat-toolbar class="sidenav__toolbar">Menu</mat-toolbar>
+    <mat-nav-list class="sidenav__list">
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         mat-list-item
-        color="primary"
         routerLinkActive="active-link"
         routerLink="/"
       >
         <mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="calendar_today"
         />
-        <span>Recent</span>
+        <span class="sidenav__list__item__text">Recent</span>
       </a>
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         mat-list-item
         routerLinkActive="active-link"
         routerLink="/done"
         ><mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="event_available"
-        />Done</a
+        /><span class="sidenav__list__item__text">Done</span></a
       >
       <a
+        class="sidenav__list__item"
         [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="active-link"
         routerLink="/inbox"
         mat-list-item
         ><mat-icon
+          class="sidenav__list__item__icon"
           aria-hidden="false"
           aria-label="Example home icon"
           fontIcon="inbox"
-        />Inbox</a
+        /><span class="sidenav__list__item__text">Inbox</span></a
       >
     </mat-nav-list>
+    <app-categories-list class="sidenav__categories-list" />
   </mat-sidenav>
-  <mat-sidenav-content>
+
+  <mat-sidenav-content class="sidenav-content">
     <ng-content />
   </mat-sidenav-content>
 </mat-sidenav-container>

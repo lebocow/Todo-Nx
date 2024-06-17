@@ -1,24 +1,77 @@
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
-// Plus imports for other components in your app.
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$todo-app-primary: mat.define-palette(mat.$indigo-palette);
-$todo-app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$main-palette: (
+  50: #e4eff0,
+  100: #bcd7d9,
+  200: #90bcc0,
+  300: #64a1a7,
+  400: #428d94,
+  500: #217981,
+  600: #1d7179,
+  700: #18666e,
+  800: #145c64,
+  900: #0b4951,
+  A100: #87efff,
+  A200: #54e9ff,
+  A400: #21e2ff,
+  A700: #08dfff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
 
-// The warn palette is optional (defaults to red).
+$secondary-palette: (
+  50: #e7fbf0,
+  100: #c3f5db,
+  200: #9ceec3,
+  300: #74e7aa,
+  400: #56e298,
+  500: #38dd86,
+  600: #32d97e,
+  700: #2bd473,
+  800: #24cf69,
+  900: #17c756,
+  A100: #f9fffb,
+  A200: #c6ffd8,
+  A400: #93ffb6,
+  A700: #7affa5,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #000000,
+    800: #000000,
+    900: #000000,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$todo-app-primary: mat.define-palette($main-palette);
+$todo-app-accent: mat.define-palette($secondary-palette);
 $todo-app-warn: mat.define-palette(mat.$red-palette);
 
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
 $todo-app-theme: mat.define-light-theme(
   (
     color: (
@@ -31,9 +84,6 @@ $todo-app-theme: mat.define-light-theme(
   )
 );
 
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
 @include mat.all-component-themes($todo-app-theme);
 
 /* You can add global styles to this file, and also import other style files */
@@ -42,6 +92,17 @@ $todo-app-theme: mat.define-light-theme(
   --main-color: 26, 121, 130;
   --secondary-color: 41, 222, 182;
   --white-color: 249, 255, 254;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --shadow-none: 0 0 #0000;
 }
 
 * {

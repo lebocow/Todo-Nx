@@ -5,19 +5,35 @@
     width: 200px;
     height: calc(100vh - 4rem);
 
-    .mat-toolbar {
+    &__toolbar {
       background: inherit;
     }
 
     .active-link {
-      background: rgba(var(--secondary-color), 0.8);
+      background: rgba(var(--secondary-color), 0.2);
     }
 
     &::ng-deep.mdc-list-item__primary-text {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       align-items: center;
-      gap: 1rem;
+
       font-size: 1.1rem;
+    }
+
+    &__list {
+      &__item {
+        &__icon {
+          justify-self: center;
+        }
+        &__text {
+          grid-column: 3 / 5;
+        }
+      }
+    }
+
+    &__categories-list {
+      margin-top: 2rem;
     }
   }
 }

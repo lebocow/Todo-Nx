@@ -54,6 +54,7 @@ model Task {
 model Category {
   id    String @id @default(uuid())
   name  String @db.VarChar(255)
+  color String @db.VarChar(7)
   tasks Task[]
 }
 
