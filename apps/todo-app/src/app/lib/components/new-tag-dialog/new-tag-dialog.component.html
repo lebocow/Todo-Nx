@@ -1,0 +1,52 @@
+<div class="new-tag-dialog">
+  <button
+    class="new-tag-dialog__close-button"
+    (click)="onClose()"
+    mat-icon-button
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <h2 class="new-tag-dialog__title">New Tag</h2>
+
+  <div class="new-tag-dialog__form">
+    <mat-form-field class="new-tag-dialog__form-field">
+      <mat-label>Tag name</mat-label>
+      <input class="new-tag-dialog__input" [formControl]="name" matInput />
+
+      @if (name.hasError('too_small') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_small') }} </mat-error>
+      } @else if (name.hasError('too_big') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_big') }} </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="new-tag-dialog__form-field">
+      <mat-label>Color</mat-label>
+      <input [formControl]="color" readonly matInput />
+      <ngx-colors
+        class="new-tag-dialog__form-field__ngx-color"
+        [formControl]="color"
+        [format]="'hex'"
+        [hideColorPicker]="true"
+        (change)="onColorChange($event)"
+        matSuffix
+        ngx-colors-trigger
+      ></ngx-colors>
+
+      @if (color.hasError('invalid_string') && (color.dirty || color.touched)) {
+        <mat-error> {{ color.getError('invalid_string') }} </mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      class="new-tag-dialog__save-button"
+      [disabled]="this.tagForm.invalid"
+      (click)="onSave()"
+      mat-raised-button
+      color="primary"
+    >
+      Save
+    </button>
+  </div>
+</div>

@@ -25,6 +25,7 @@
       &__item {
         &__icon {
           justify-self: center;
+          color: rgba(var(--main-color));
         }
         &__text {
           grid-column: 3 / 5;

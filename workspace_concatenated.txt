@@ -232,12 +232,22 @@ export const appRoutes: Route[] = [
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/categories-list/categories-list.component.html
+<mat-toolbar class="categories-list__toolbar">
+  <span>Categories</span>
+</mat-toolbar>
+
 <mat-nav-list class="categories-list">
-  <a class="categories-list__item" mat-list-item>
-    <div class="categories-list__item__color"></div>
-    <span class="categories-list__item__text">Project</span>
-  </a>
-  <a class="categories-list__item" mat-list-item>
+  @for (category of categoriesSvc.categories(); track category) {
+    <a class="categories-list__item" mat-list-item>
+      <div
+        class="categories-list__item__color"
+        [ngStyle]="{ 'background-color': category.color }"
+      ></div>
+      <span class="categories-list__item__text"> {{ category.name }}</span>
+    </a>
+  }
+
+  <a class="categories-list__item" (click)="onCreateNewTag()" mat-list-item>
     <div class="categories-list__item__color"></div>
     <span class="categories-list__item__text categories-list__item__text--new"
       >New Tag</span
@@ -252,10 +262,14 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 }
 
 .categories-list {
+  &__toolbar {
+    background: inherit;
+  }
+
   &__item {
     &__color {
       justify-self: center;
-      background-color: red;
+      background-color: rgba(var(--main-color));
       width: 0.75rem;
       height: 1.25rem;
     }
@@ -273,29 +287,59 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/categories-list/categories-list.component.ts
 import { MatListModule } from '@angular/material/list';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { ICategory } from '@myworkspace/data-models';
+import { MatToolbar } from '@angular/material/toolbar';
+import { CategoryService } from '@lib/services/category.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-categories-list',
   standalone: true,
-  imports: [CommonModule, MatSidenavModule, MatListModule],
+  imports: [CommonModule, MatSidenavModule, MatListModule, MatToolbar],
   templateUrl: './categories-list.component.html',
   styleUrl: './categories-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CategoriesListComponent {
-  category = input<ICategory>();
+export class CategoriesListComponent implements OnInit {
+  private readonly dialog = inject(MatDialog);
+  private readonly toastrSvc = inject(ToastrService);
+  readonly categoriesSvc = inject(CategoryService);
+
+  ngOnInit(): void {
+    this.categoriesSvc.getCategories().subscribe({
+      next: (res) => {
+        this.toastrSvc.success(res.message);
+      },
+      error: (error: Error) => {
+        this.toastrSvc.error(error.message);
+      },
+    });
+  }
+
+  async onCreateNewTag() {
+    const { NewTagDialogComponent } = await import('@lib/components');
+
+    this.dialog.open(NewTagDialogComponent, {
+      disableClose: true,
+    });
+  }
 }
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
+export * from './categories-list/categories-list.component';
 export * from './navbar/navbar.component';
+export * from './new-tag-dialog/new-tag-dialog.component';
 export * from './sidenav/sidenav.component';
 export * from './task-card/task-card.component';
-export * from './categories-list/categories-list.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
@@ -409,6 +453,183 @@ export class NavbarComponent {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/new-tag-dialog/new-tag-dialog.component.html
+<div class="new-tag-dialog">
+  <button
+    class="new-tag-dialog__close-button"
+    (click)="onClose()"
+    mat-icon-button
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+
+  <h2 class="new-tag-dialog__title">New Tag</h2>
+
+  <div class="new-tag-dialog__form">
+    <mat-form-field class="new-tag-dialog__form-field">
+      <mat-label>Tag name</mat-label>
+      <input class="new-tag-dialog__input" [formControl]="name" matInput />
+
+      @if (name.hasError('too_small') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_small') }} </mat-error>
+      } @else if (name.hasError('too_big') && (name.dirty || name.touched)) {
+        <mat-error> {{ name.getError('too_big') }} </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="new-tag-dialog__form-field">
+      <mat-label>Color</mat-label>
+      <input [formControl]="color" readonly matInput />
+      <ngx-colors
+        class="new-tag-dialog__form-field__ngx-color"
+        [formControl]="color"
+        [format]="'hex'"
+        [hideColorPicker]="true"
+        (change)="onColorChange($event)"
+        matSuffix
+        ngx-colors-trigger
+      ></ngx-colors>
+
+      @if (color.hasError('invalid_string') && (color.dirty || color.touched)) {
+        <mat-error> {{ color.getError('invalid_string') }} </mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      class="new-tag-dialog__save-button"
+      [disabled]="this.tagForm.invalid"
+      (click)="onSave()"
+      mat-raised-button
+      color="primary"
+    >
+      Save
+    </button>
+  </div>
+</div>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/new-tag-dialog/new-tag-dialog.component.scss
+:host {
+  display: block;
+}
+
+.new-tag-dialog {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  padding: 1rem;
+  width: 400px;
+
+  &__close-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  &__title {
+    margin-top: unset;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__form-field {
+    width: 100%;
+
+    &__ngx-color {
+      display: block;
+      width: 40px;
+    }
+  }
+
+  &__input {
+  }
+
+  &__save-button {
+    align-self: flex-end;
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/new-tag-dialog/new-tag-dialog.component.ts
+import { ToastrService } from 'ngx-toastr';
+import { MatIconModule } from '@angular/material/icon';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogRef } from '@angular/material/dialog';
+import { NgxColorsModule } from 'ngx-colors';
+import { zodValidator } from '@lib/validators/zod-validator.validator';
+import { CreateCategorySchema } from '@myworkspace/data-models';
+import { CategoryService } from '@lib/services/category.service';
+import { HttpErrorResponse } from '@angular/common/http';
+
+@Component({
+  selector: 'app-new-tag-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    NgxColorsModule,
+  ],
+  templateUrl: './new-tag-dialog.component.html',
+  styleUrl: './new-tag-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class NewTagDialogComponent {
+  private readonly dialogRef = inject(MatDialogRef<NewTagDialogComponent>);
+
+  private readonly categoriesSvc = inject(CategoryService);
+  private readonly toastrSvc = inject(ToastrService);
+
+  name = new FormControl<string>('', [
+    zodValidator(CreateCategorySchema.shape.name),
+  ]);
+  color = new FormControl<string>('', [
+    zodValidator(CreateCategorySchema.shape.color),
+  ]);
+
+  tagForm = new FormGroup({
+    name: this.name,
+    color: this.color,
+  });
+
+  onClose() {
+    this.dialogRef.close();
+  }
+
+  onSave() {
+    if (this.tagForm.invalid) return;
+    this.categoriesSvc
+      .addCategory(this.name.value!, this.color.value!)
+      .subscribe({
+        next: (res) => {
+          this.toastrSvc.success(res.message);
+        },
+        error: (error: Error) => {
+          this.toastrSvc.error(error.message);
+        },
+        complete: () => {
+          this.dialogRef.close();
+        },
+      });
+  }
+
+  onColorChange($event: string) {
+    this.color.setValue($event);
+  }
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/sidenav/sidenav.component.html
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
@@ -509,6 +730,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
       &__item {
         &__icon {
           justify-self: center;
+          color: rgba(var(--main-color));
         }
         &__text {
           grid-column: 3 / 5;
@@ -590,16 +812,16 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-card/task-card.component.scss
 .task-card {
-  background-color: rgba(var(--white-color));
   box-shadow: var(--shadow-xl);
+  background-color: rgba(var(--white-color));
 
   .icon-group {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: space-around;
+    align-items: center;
     background-color: rgba(var(--main-color));
+    height: 100%;
 
     &__icon {
       cursor: pointer;
@@ -608,33 +830,33 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   }
 
   &__menu {
-    width: 3rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: space-between;
-    background-color: var(--secondary-color);
+    align-items: center;
     border: 0;
+    background-color: var(--secondary-color);
+    width: 3rem;
   }
 
   &__content {
-    padding: 1rem 2rem 1rem;
     transition-duration: 400ms;
     transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 1rem 2rem 1rem;
 
     :has(mat-drawer.mat-drawer-opened) & {
       padding: 1rem;
     }
 
     &__bar {
-      width: 1rem;
       position: absolute;
       top: 0;
       bottom: 0;
       left: 0;
-      background-color: red;
       transition-duration: 400ms;
       transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+      background-color: rgba(var(--main-color));
+      width: 0.8rem;
 
       :has(mat-drawer.mat-drawer-opened) & {
         width: 0px;
@@ -643,12 +865,12 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     &__checkbox {
       position: absolute;
-      right: 5px;
       top: 5px;
+      right: 5px;
+      cursor: pointer;
+      background-color: green;
       width: 2rem;
       height: 2rem;
-      background-color: green;
-      cursor: pointer;
     }
 
     &__date {
@@ -888,7 +1110,7 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
           );
 
         default:
-          return throwError(() => error);
+          return throwError(() => new Error(error.error.message));
       }
     }),
   );
@@ -1139,6 +1361,68 @@ export class BreakpointService {
       shareReplay(1),
     ),
   );
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/category.service.ts
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { environment } from '@env/environment';
+import { IApiResponse } from '@lib/interfaces';
+import {
+  ICategory,
+  ICategoryResponse,
+  ICreateCategoryResponse,
+} from '@myworkspace/data-models';
+
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class CategoryService {
+  private readonly HttpClient = inject(HttpClient);
+
+  readonly categories = signal<ICategory[]>([]);
+
+  getCategories(): Observable<IApiResponse<ICategoryResponse>> {
+    return this.HttpClient.get<IApiResponse<ICategoryResponse>>(
+      `${environment.apiUrl}/category`,
+    ).pipe(
+      switchMap((res) => {
+        const { categories } = res.data;
+
+        this.categories.set(categories);
+
+        return of(res);
+      }),
+      catchError((error: Error) => {
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  addCategory(name: string, color: string) {
+    return this.HttpClient.post<IApiResponse<ICreateCategoryResponse>>(
+      `${environment.apiUrl}/category/create`,
+      {
+        name,
+        color,
+      },
+    ).pipe(
+      switchMap((res: IApiResponse<ICreateCategoryResponse>) => {
+        const { category } = res.data;
+
+        console.log(category);
+
+        this.categories.update((categories) => [...categories, category]);
+        return of(res);
+      }),
+      catchError((error: Error) => {
+        return throwError(() => error);
+      }),
+    );
+  }
 }
 
 
@@ -1868,37 +2152,38 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.scss
 :host {
-  height: 100%;
-  width: 100%;
   display: block;
-  padding: 3rem;
   background-color: rgba(var(--secondary-color), 0.05);
+  padding: 3rem;
+  width: 100%;
+  height: 100%;
 }
 
 .container {
-  height: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  height: 100%;
   grid-gap: 3rem;
 
   &__section {
     &-title {
       margin: 0;
+      color: rgba(var(--main-color));
     }
 
     mat-chip-set {
       ::ng-deep .mdc-evolution-chip-set__chips {
-        overflow-x: auto;
         flex-wrap: nowrap;
+        overflow-x: auto;
         scrollbar-width: thin;
       }
     }
 
     &__task-list {
-      margin-top: 1rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      margin-top: 1rem;
     }
   }
 }
@@ -2421,6 +2706,20 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prism
 ALTER TABLE "Category" ALTER COLUMN "color" SET DATA TYPE VARCHAR(7);
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240618131510_init/migration.sql
+/*
+  Warnings:
+
+  - Added the required column `userId` to the `Category` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- AlterTable
+ALTER TABLE "Category" ADD COLUMN     "userId" TEXT NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Category" ADD CONSTRAINT "Category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/migration_lock.toml
 # Please do not edit this file manually
 # It should be added in your version-control system (i.e. Git)
@@ -2451,6 +2750,7 @@ model User {
   tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  categories Category[]
   Token     Token[]
 }
 
@@ -2484,6 +2784,8 @@ model Category {
   id    String @id @default(uuid())
   name  String @db.VarChar(255)
   color String @db.VarChar(7)
+  userId String
+  user  User   @relation(fields: [userId], references: [id])
   tasks Task[]
 }
 
@@ -2718,11 +3020,6 @@ const jwtVerify: VerifyCallback = async (payload, done) => {
     }
 
     const user = await prisma.user.findUnique({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-      },
       where: { id: payload.sub },
     });
     if (!user) {
@@ -2846,8 +3143,51 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/category.controller.ts
+import { Request, Response } from 'express';
+
+import { categoryService } from '../services';
+
+import {
+  CreateCategorySchema,
+  ICreateCategory,
+  IUser,
+} from '@myworkspace/data-models';
+import { catchAsync } from '../utils';
+import httpStatus from 'http-status';
+
+export const createCategory = catchAsync(
+  async (req: Request, res: Response) => {
+    CreateCategorySchema.parse(req.body);
+
+    const user = req.user as IUser;
+
+    const { name, color } = req.body as ICreateCategory;
+
+    const category = await categoryService.createCategory(name, color, user.id);
+
+    return res.status(httpStatus.CREATED).json({
+      message: `Category ${name} was created successfully`,
+      data: { category },
+    });
+  },
+);
+
+export const getCategories = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as IUser;
+
+  const categories = await categoryService.getCategories(user.id);
+
+  return res.status(httpStatus.OK).json({
+    message: 'Categories retrieved successfully',
+    data: { categories },
+  });
+});
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/index.ts
 export * as authController from './auth.controller';
+export * as categoryController from './category.controller';
 export * as taskController from './task.controller';
 export * as userController from './user.controller';
 
@@ -2855,13 +3195,13 @@ export * as userController from './user.controller';
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/task.controller.ts
 import { Request, Response } from 'express';
 
-export const test = (req: Request, res: Response) => {
-  res.status(404).json({ message: 'Hello' });
+export const createCategory = (req: Request, res: Response) => {
+  res.status(200).json({ message: 'Hello' });
 };
 
-// export const hello = (req: Request, res: Response) => {
-//   res.status(200).json({ message: 'Hello API' });
-// };
+export const getCategories = (req: Request, res: Response) => {
+  res.status(200).json({ message: 'Hello' });
+};
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/user.controller.ts
@@ -2941,25 +3281,26 @@ const verifyCallback: (
   req: Request,
   resolve: (value?: unknown) => void,
   reject: (reason?: unknown) => void,
-  requiredRights: string[]
+  requiredRights: string[],
 ) => AuthenticateCallback =
   (req, resolve, reject, requiredRights) =>
   async (
     err: any,
     user?: User | false | null,
-    info?: object | string | Array<string | undefined>
+    info?: object | string | Array<string | undefined>,
   ): Promise<void> => {
     if (err || info || !user) {
       return reject(
-        new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate')
+        new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'),
       );
     }
+
     req.user = user;
 
     if (requiredRights.length) {
       const userRights = roleRights.get(user.role) ?? [];
       const hasRequiredRights = requiredRights.every((requiredRight) =>
-        userRights.includes(requiredRight)
+        userRights.includes(requiredRight),
       );
       if (!hasRequiredRights && req.params.userId !== user.id) {
         return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
@@ -2976,7 +3317,7 @@ const auth =
       passport.authenticate(
         'jwt',
         { session: false },
-        verifyCallback(req, resolve, reject, requiredRights)
+        verifyCallback(req, resolve, reject, requiredRights),
       )(req, res, next);
     })
       .then(() => next())
@@ -3048,6 +3389,8 @@ import express from 'express';
 
 import { authController } from '../../controllers';
 
+import auth from '../../middlewares/auth';
+
 const router = express.Router();
 
 router.post('/register', authController.register);
@@ -3056,7 +3399,21 @@ router.post('/login', authController.login);
 
 router.post('/refresh-token', authController.refreshToken);
 
-router.post('/logout', authController.logout);
+router.post('/logout', auth(), authController.logout);
+
+export default router;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/routes/v1/category.route.ts
+import express from 'express';
+
+import { categoryController } from '../../controllers/';
+import auth from '../../middlewares/auth';
+
+const router = express.Router();
+
+router.get('/', auth(), categoryController.getCategories);
+router.post('/create', auth(), categoryController.createCategory);
 
 export default router;
 
@@ -3066,6 +3423,7 @@ import express from 'express';
 import authRoute from './auth.route';
 import taskRoute from './task.route';
 import userRoute from './user.route';
+import categoryRoute from './category.route';
 
 const router = express.Router();
 
@@ -3081,6 +3439,10 @@ const defaultRoutes = [
   {
     path: '/user',
     route: userRoute,
+  },
+  {
+    path: '/category',
+    route: categoryRoute,
   },
 ];
 
@@ -3099,7 +3461,7 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.post('/test', auth(), taskController.test);
+// router.post('/test', auth(), taskController.test);
 
 export default router;
 
@@ -3121,7 +3483,6 @@ export default router;
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/auth.service.ts
-import { refreshToken } from './../controllers/auth.controller';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
@@ -3190,8 +3551,68 @@ export const logout = async (refreshToken: string) => {
 };
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/category.service.ts
+import { exclude } from './../utils/exclude';
+import httpStatus from 'http-status';
+import prisma from '../client';
+import ApiError from '../utils/ApiError';
+
+export const createCategory = async (
+  name: string,
+  color: string,
+  userId: string,
+) => {
+  const category = await prisma.category.create({
+    data: {
+      name,
+      color,
+      userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      color: true,
+    },
+  });
+
+  return category;
+};
+
+export const getCategoryById = async (id: string, userId: string) => {
+  const category = await prisma.category.findUnique({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!category) throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+
+  return category;
+};
+
+export const getCategories = async (userId: string) => {
+  const categories = await prisma.category.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      color: true,
+    },
+  });
+
+  if (!categories)
+    throw new ApiError(httpStatus.NOT_FOUND, 'Categories not found');
+
+  return categories;
+};
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/index.ts
 export * as authService from './auth.service';
+export * as categoryService from './category.service';
 export * as tokenService from './token.service';
 export * as userService from './user.service';
 
@@ -3203,6 +3624,8 @@ import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import prisma from '../client.js';
+import ApiError from '../utils/ApiError.js';
+import httpStatus from 'http-status';
 
 interface JwtPayload {
   sub: string;
@@ -3327,7 +3750,8 @@ export const verifyToken = async (token: string, type: TokenType) => {
 
   const userId = payload.sub;
 
-  if (payload.type !== type) throw new Error('Invalid token type');
+  if (payload.type !== type)
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, 'Invalid token type');
 
   const tokenData = await prisma.token.findFirst({
     where: {
@@ -3338,7 +3762,7 @@ export const verifyToken = async (token: string, type: TokenType) => {
     },
   });
 
-  if (!tokenData) throw new Error('Token not found!');
+  if (!tokenData) throw new ApiError(httpStatus.NOT_FOUND, 'Token not found');
 
   return tokenData;
 };

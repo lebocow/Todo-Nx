@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+.new-tag-dialog {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  padding: 1rem;
+  width: 400px;
+
+  &__close-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  &__title {
+    margin-top: unset;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__form-field {
+    width: 100%;
+
+    &__ngx-color {
+      display: block;
+      width: 40px;
+    }
+  }
+
+  &__input {
+  }
+
+  &__save-button {
+    align-self: flex-end;
+  }
+}

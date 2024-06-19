@@ -1,9 +1,19 @@
+<mat-toolbar class="categories-list__toolbar">
+  <span>Categories</span>
+</mat-toolbar>
+
 <mat-nav-list class="categories-list">
-  <a class="categories-list__item" mat-list-item>
-    <div class="categories-list__item__color"></div>
-    <span class="categories-list__item__text">Project</span>
-  </a>
-  <a class="categories-list__item" mat-list-item>
+  @for (category of categoriesSvc.categories(); track category) {
+    <a class="categories-list__item" mat-list-item>
+      <div
+        class="categories-list__item__color"
+        [ngStyle]="{ 'background-color': category.color }"
+      ></div>
+      <span class="categories-list__item__text"> {{ category.name }}</span>
+    </a>
+  }
+
+  <a class="categories-list__item" (click)="onCreateNewTag()" mat-list-item>
     <div class="categories-list__item__color"></div>
     <span class="categories-list__item__text categories-list__item__text--new"
       >New Tag</span

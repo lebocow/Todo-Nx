@@ -4,6 +4,8 @@ import { TokenType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
 import prisma from '../client.js';
+import ApiError from '../utils/ApiError.js';
+import httpStatus from 'http-status';
 
 interface JwtPayload {
   sub: string;
@@ -128,7 +130,8 @@ export const verifyToken = async (token: string, type: TokenType) => {
 
   const userId = payload.sub;
 
-  if (payload.type !== type) throw new Error('Invalid token type');
+  if (payload.type !== type)
+    throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY, 'Invalid token type');
 
   const tokenData = await prisma.token.findFirst({
     where: {
@@ -139,7 +142,7 @@ export const verifyToken = async (token: string, type: TokenType) => {
     },
   });
 
-  if (!tokenData) throw new Error('Token not found!');
+  if (!tokenData) throw new ApiError(httpStatus.NOT_FOUND, 'Token not found');
 
   return tokenData;
 };

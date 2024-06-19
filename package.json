@@ -33,6 +33,7 @@
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "ngx-avatars": "^1.7.0",
+    "ngx-colors": "^3.6.0",
     "ngx-cookie-service": "^17.1.0",
     "ngx-toastr": "^18.0.0",
     "ngxtension": "^3.3.0",

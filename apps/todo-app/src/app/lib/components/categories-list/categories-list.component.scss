@@ -3,10 +3,14 @@
 }
 
 .categories-list {
+  &__toolbar {
+    background: inherit;
+  }
+
   &__item {
     &__color {
       justify-self: center;
-      background-color: red;
+      background-color: rgba(var(--main-color));
       width: 0.75rem;
       height: 1.25rem;
     }

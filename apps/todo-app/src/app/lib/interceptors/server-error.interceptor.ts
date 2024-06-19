@@ -62,7 +62,7 @@ export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
           );
 
         default:
-          return throwError(() => error);
+          return throwError(() => new Error(error.error.message));
       }
     }),
   );

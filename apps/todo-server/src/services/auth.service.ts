@@ -1,4 +1,3 @@
-import { refreshToken } from './../controllers/auth.controller';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import { matchPassword } from '../utils';
