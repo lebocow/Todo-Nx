@@ -1,0 +1,133 @@
+<div class="floating-task-calendar-form">
+  @if (isOpened()) {
+    <mat-calendar
+      class="floating-task-calendar-form__calendar"
+      [selected]="dueDate.value"
+      [minDate]="minDate()"
+      (selectedChange)="onDateSelected($event)"
+    />
+    <div class="floating-task-calendar-form__form">
+      <mat-form-field
+        class="floating-task-calendar-form__form__field"
+        appearance="outline"
+      >
+        <input
+          class="floating-task-calendar-form__form__field__input"
+          #dueTimeInput
+          type="time"
+          matInput
+        />
+      </mat-form-field>
+      <button
+        class="floating-task-calendar-form__form__button"
+        (click)="onConfirmDueTime(dueTimeInput.value)"
+        mat-raised-button
+        color="accent"
+      >
+        <span>Enter</span>
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  }
+</div>
+<div
+  class="floating-task-form"
+  [ngClass]="{ 'floating-task-form--opened': isOpened() }"
+>
+  @if (!isOpened()) {
+    <button
+      class="floating-task-form__button floating-task-form__button--add"
+      [@fadeInOut]
+      (click)="onSlideUp()"
+      mat-fab
+      color="accent"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+  @if (isOpened()) {
+    <button
+      class="floating-task-form__button floating-task-form__button--close"
+      [@fadeInOut]
+      (click)="onSlideDown()"
+      mat-icon-button
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+  @if (isOpened()) {
+    @defer (when isOpened()) {
+      <div class="floating-task-form__content">
+        <mat-form-field
+          class="floating-task-form__content__field floating-task-form__content__field--title"
+          color="primary"
+        >
+          <mat-label class="floating-task-form__content__field__label"
+            >Title</mat-label
+          >
+          <input
+            class="floating-task-form__content__field__input"
+            [formControl]="title"
+            matInput
+          />
+        </mat-form-field>
+
+        <mat-form-field
+          class="floating-task-form__content__field floating-task-form__content__field--category"
+          color="primary"
+        >
+          <mat-label class="floating-task-form__content__field__label"
+            >Choose Tag</mat-label
+          >
+          <mat-select
+            class="floating-task-form__content__field__select"
+            [formControl]="categoryId"
+          >
+            <mat-option
+              class="floating-task-form__content__field__select__option floating-task-form__content__field__select__option--none"
+              [value]="null"
+              >-- None --</mat-option
+            >
+            @for (category of categoriesSvc.categories(); track category.id) {
+              <mat-option
+                class="floating-task-form__content__field__select__option"
+                [value]="category.id"
+              >
+                {{ category.name }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div
+          class="NgxEditor__Wrapper floating-task-form__content__description-editor"
+        >
+          <ngx-editor-menu
+            class="floating-task-form__content__description-editor__editor-menu"
+            [editor]="editor"
+            [toolbar]="toolbar"
+          >
+          </ngx-editor-menu>
+          <ngx-editor
+            class="floating-task-form__content__description-editor__editor"
+            [editor]="editor"
+            [formControl]="description"
+          >
+          </ngx-editor>
+        </div>
+      </div>
+
+      <button
+        class="floating-task-form__button floating-task-form__button--check"
+        [disabled]="taskForm.invalid"
+        (click)="onCreateTask()"
+        color="accent"
+        mat-raised-button
+      >
+        <mat-icon class="floating-task-form__button--check__icon"
+          >check</mat-icon
+        >
+      </button>
+    }
+  }
+</div>

@@ -39,9 +39,9 @@ export class TaskCardComponent {
   private readonly drawer = viewChild.required<MatDrawer>('drawer');
   private readonly bar = viewChild.required<ElementRef<HTMLDivElement>>('bar');
 
-  readonly task = input<ITask>();
+  readonly task = input.required<ITask>();
 
-  private hoverTimeout: ReturnType<typeof setTimeout> | undefined;
+  private hoverTimeout!: ReturnType<typeof setTimeout>;
 
   @HostListener('mouseover', ['$event'])
   onMouseOver(event: MouseEvent) {

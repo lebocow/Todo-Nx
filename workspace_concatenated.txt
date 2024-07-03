@@ -334,12 +334,123 @@ export class CategoriesListComponent implements OnInit {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.html
+<div
+  class="floating-task-form"
+  [ngClass]="{ 'floating-task-form--expanded': isExpanded() }"
+>
+  <button
+    class="floating-task-form__button"
+    (click)="onToggle()"
+    mat-fab
+    color="accent"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <div class="floating-task-form__content">
+    <h1>test</h1>
+    <h2>test</h2>
+  </div>
+</div>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.scss
+:host {
+  display: block;
+  position: fixed;
+  right: 7.5rem;
+  bottom: -25rem;
+  animation-duration: 300ms;
+  box-shadow: var(--shadow-2xl);
+
+  &:has(div.floating-task-form--expanded) {
+    bottom: 8rem;
+    animation: slideUp 300ms ease-in-out forwards;
+  }
+
+  &:not(:has(div.floating-task-form--expanded)) {
+    animation: slideDown 300ms ease-in-out forwards;
+  }
+}
+
+.floating-task-form {
+  background-color: rgba(var(--white-color));
+  width: 25rem;
+  height: 30rem;
+
+  &--expanded {
+    // backdrop-filter: blur(20px);
+    // animation-duration: 1s;
+    // background-color: unset;
+    // width: 100%;
+    // height: 100%;
+  }
+
+  &__button {
+    position: absolute;
+    top: -1.5rem;
+    left: 1.5rem;
+    color: rgba(var(--white-color));
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    bottom: -25rem;
+  }
+  to {
+    bottom: 8rem;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    bottom: 8rem;
+  }
+  to {
+    bottom: -25rem;
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.ts
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { TaskFormComponent } from '../task-form/task-form.component';
+
+@Component({
+  selector: 'app-floating-task-form',
+  standalone: true,
+  templateUrl: './floating-task-form.component.html',
+  styleUrl: './floating-task-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, MatButtonModule, MatIconModule, TaskFormComponent],
+})
+export class FloatingTaskFormComponent {
+  isExpanded = signal(false);
+
+  onToggle() {
+    this.isExpanded.update((v) => !v);
+  }
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
 export * from './categories-list/categories-list.component';
+export * from './floating-task-form/floating-task-form.component';
 export * from './navbar/navbar.component';
 export * from './new-tag-dialog/new-tag-dialog.component';
 export * from './sidenav/sidenav.component';
 export * from './task-card/task-card.component';
+export * from './task-form/task-form.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
@@ -377,9 +488,9 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.scss
 .mat-toolbar.mat-primary {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
   bottom: 0;
+  z-index: 1;
 }
 
 .user {
@@ -388,13 +499,13 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     flex-direction: row;
     align-items: center;
     gap: 0.7rem;
-    height: min-content;
     padding: 0.4rem;
+    height: min-content;
 
     &:hover {
       cursor: pointer;
-      background-color: #218a95;
       border-radius: 0.3rem;
+      background-color: #218a95;
     }
   }
 }
@@ -567,7 +678,6 @@ import { NgxColorsModule } from 'ngx-colors';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { CreateCategorySchema } from '@myworkspace/data-models';
 import { CategoryService } from '@lib/services/category.service';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-new-tag-dialog',
@@ -609,19 +719,22 @@ export class NewTagDialogComponent {
 
   onSave() {
     if (this.tagForm.invalid) return;
-    this.categoriesSvc
-      .addCategory(this.name.value!, this.color.value!)
-      .subscribe({
-        next: (res) => {
-          this.toastrSvc.success(res.message);
-        },
-        error: (error: Error) => {
-          this.toastrSvc.error(error.message);
-        },
-        complete: () => {
-          this.dialogRef.close();
-        },
-      });
+
+    if (this.name.value && this.color.value) {
+      this.categoriesSvc
+        .addCategory(this.name.value, this.color.value)
+        .subscribe({
+          next: (res) => {
+            this.toastrSvc.success(res.message);
+          },
+          error: (error: Error) => {
+            this.toastrSvc.error(error.message);
+          },
+          complete: () => {
+            this.dialogRef.close();
+          },
+        });
+    }
   }
 
   onColorChange($event: string) {
@@ -963,6 +1076,31 @@ export class TaskCardComponent {
     this.drawer().close();
   }
 }
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.html
+<p>task-form works!</p>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.scss
+:host {
+  display: block;
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.ts
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-task-form',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './task-form.component.html',
+  styleUrl: './task-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TaskFormComponent {}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/guards/auth/auth.guard.ts
@@ -1412,8 +1550,6 @@ export class CategoryService {
     ).pipe(
       switchMap((res: IApiResponse<ICreateCategoryResponse>) => {
         const { category } = res.data;
-
-        console.log(category);
 
         this.categories.update((categories) => [...categories, category]);
         return of(res);
@@ -2157,6 +2293,10 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   padding: 3rem;
   width: 100%;
   height: 100%;
+
+  :has(.floating-task-form--expanded) & {
+    // background-color: red;
+  }
 }
 
 .container {
@@ -2188,13 +2328,25 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
   }
 }
 
+.floating-form {
+}
+
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.ts
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentRef,
+  inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { TaskCardComponent } from '@lib/components';
+import { TaskCardComponent, FloatingTaskFormComponent } from '@lib/components';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
 
 @Component({
   selector: 'app-recent',
@@ -2202,9 +2354,32 @@ import { TaskCardComponent } from '@lib/components';
   templateUrl: './recent.component.html',
   styleUrl: './recent.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatChipsModule, MatSidenavModule, TaskCardComponent],
+  imports: [
+    CommonModule,
+    MatChipsModule,
+    MatSidenavModule,
+    TaskCardComponent,
+    FloatingTaskFormComponent,
+  ],
 })
-export class RecentComponent {}
+export class RecentComponent implements OnInit, OnDestroy {
+  private overlayRef!: OverlayRef;
+  private floatingTaskFormComponentRef!: ComponentRef<FloatingTaskFormComponent>;
+  private readonly overlay = inject(Overlay);
+
+  ngOnInit() {
+    this.overlayRef = this.overlay.create({
+      hasBackdrop: false,
+    });
+
+    const portal = new ComponentPortal(FloatingTaskFormComponent);
+    this.floatingTaskFormComponentRef = this.overlayRef.attach(portal);
+  }
+
+  ngOnDestroy() {
+    this.overlayRef.dispose();
+  }
+}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/assets/.gitkeep

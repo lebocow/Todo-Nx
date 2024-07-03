@@ -8,11 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
 import { MatMenuModule } from '@angular/material/menu';
-import { BreakpointService } from '@lib/services/breakpoint.service';
-import { SidenavService } from '@lib/services/sidenav.service';
 import { AvatarModule } from 'ngx-avatars';
-import { UserService } from '@lib/services/user.service';
-import { AuthService } from '@lib/services';
+import {
+  AuthService,
+  UserService,
+  BreakpointService,
+  SidenavService,
+} from '@lib/services';
 
 @Component({
   selector: 'app-navbar',

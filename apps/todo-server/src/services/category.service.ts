@@ -1,7 +1,4 @@
-import { exclude } from './../utils/exclude';
-import httpStatus from 'http-status';
 import prisma from '../client';
-import ApiError from '../utils/ApiError';
 
 export const createCategory = async (
   name: string,
@@ -32,8 +29,6 @@ export const getCategoryById = async (id: string, userId: string) => {
     },
   });
 
-  if (!category) throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
-
   return category;
 };
 
@@ -48,9 +43,6 @@ export const getCategories = async (userId: string) => {
       color: true,
     },
   });
-
-  if (!categories)
-    throw new ApiError(httpStatus.NOT_FOUND, 'Categories not found');
 
   return categories;
 };

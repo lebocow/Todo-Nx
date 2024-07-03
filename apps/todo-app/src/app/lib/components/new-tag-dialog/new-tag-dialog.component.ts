@@ -10,8 +10,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NgxColorsModule } from 'ngx-colors';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { CreateCategorySchema } from '@myworkspace/data-models';
-import { CategoryService } from '@lib/services/category.service';
-import { HttpErrorResponse } from '@angular/common/http';
+import { CategoryService } from '@lib/services';
 
 @Component({
   selector: 'app-new-tag-dialog',
@@ -53,19 +52,22 @@ export class NewTagDialogComponent {
 
   onSave() {
     if (this.tagForm.invalid) return;
-    this.categoriesSvc
-      .addCategory(this.name.value!, this.color.value!)
-      .subscribe({
-        next: (res) => {
-          this.toastrSvc.success(res.message);
-        },
-        error: (error: Error) => {
-          this.toastrSvc.error(error.message);
-        },
-        complete: () => {
-          this.dialogRef.close();
-        },
-      });
+
+    if (this.name.value && this.color.value) {
+      this.categoriesSvc
+        .addCategory(this.name.value, this.color.value)
+        .subscribe({
+          next: (res) => {
+            this.toastrSvc.success(res.message);
+          },
+          error: (error: Error) => {
+            this.toastrSvc.error(error.message);
+          },
+          complete: () => {
+            this.dialogRef.close();
+          },
+        });
+    }
   }
 
   onColorChange($event: string) {

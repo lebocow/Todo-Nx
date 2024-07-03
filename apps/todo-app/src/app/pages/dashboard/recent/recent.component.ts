@@ -1,8 +1,18 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ComponentRef,
+  inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { TaskCardComponent } from '@lib/components';
+import { TaskCardComponent, FloatingTaskFormComponent } from '@lib/components';
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
+import { TaskService } from '@lib/services';
 
 @Component({
   selector: 'app-recent',
@@ -10,6 +20,31 @@ import { TaskCardComponent } from '@lib/components';
   templateUrl: './recent.component.html',
   styleUrl: './recent.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatChipsModule, MatSidenavModule, TaskCardComponent],
+  imports: [
+    CommonModule,
+    MatChipsModule,
+    MatSidenavModule,
+    TaskCardComponent,
+    FloatingTaskFormComponent,
+  ],
 })
-export class RecentComponent {}
+export class RecentComponent implements OnInit, OnDestroy {
+  readonly taskSvc = inject(TaskService);
+
+  private overlayRef!: OverlayRef;
+  private floatingTaskFormComponentRef!: ComponentRef<FloatingTaskFormComponent>;
+  private readonly overlay = inject(Overlay);
+
+  ngOnInit() {
+    this.overlayRef = this.overlay.create({
+      hasBackdrop: false,
+    });
+
+    const portal = new ComponentPortal(FloatingTaskFormComponent);
+    this.floatingTaskFormComponentRef = this.overlayRef.attach(portal);
+  }
+
+  ngOnDestroy() {
+    this.overlayRef.dispose();
+  }
+}

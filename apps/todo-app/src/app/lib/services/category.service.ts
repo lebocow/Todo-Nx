@@ -35,7 +35,10 @@ export class CategoryService {
     );
   }
 
-  addCategory(name: string, color: string) {
+  addCategory(
+    name: string,
+    color: string,
+  ): Observable<IApiResponse<ICreateCategoryResponse>> {
     return this.HttpClient.post<IApiResponse<ICreateCategoryResponse>>(
       `${environment.apiUrl}/category/create`,
       {

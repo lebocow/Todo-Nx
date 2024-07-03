@@ -4,7 +4,11 @@
   "license": "MIT",
   "scripts": {
     "prisma:migrate": "cd apps/todo-server && prisma migrate dev",
-    "prisma:generate": "cd apps/todo-server && prisma generate"
+    "prisma:generate": "cd apps/todo-server && prisma generate",
+    "build:data-models": "nx run data-models:build",
+    "serve:todo-app": "nx run todo-app:serve --configuration=development",
+    "serve:todo-server": "nx run todo-server:serve --configuration=development",
+    "start": "npm run build:data-models && nx run-many --target=serve --projects=todo-app,todo-server --parallel --configuration=development"
   },
   "private": true,
   "dependencies": {
@@ -35,6 +39,7 @@
     "ngx-avatars": "^1.7.0",
     "ngx-colors": "^3.6.0",
     "ngx-cookie-service": "^17.1.0",
+    "ngx-editor": "^17.5.4",
     "ngx-toastr": "^18.0.0",
     "ngxtension": "^3.3.0",
     "passport": "^0.7.0",

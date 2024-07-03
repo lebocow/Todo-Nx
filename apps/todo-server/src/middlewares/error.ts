@@ -17,6 +17,7 @@ export const errorConverter: ErrorRequestHandler = (
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const statusCode = httpStatus.BAD_REQUEST;
     const message = error.message;
+
     error = new ApiError(statusCode, message, false);
   }
 

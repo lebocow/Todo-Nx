@@ -16,8 +16,9 @@
     </mat-chip-set>
 
     <div class="container__section__task-list">
-      <app-task-card />
-      <app-task-card />
+      @for (task of taskSvc.tasks(); track task) {
+        <app-task-card [task]="task" />
+      }
     </div>
   </div>
 

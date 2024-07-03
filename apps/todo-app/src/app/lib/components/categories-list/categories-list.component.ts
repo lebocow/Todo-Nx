@@ -28,10 +28,10 @@ export class CategoriesListComponent implements OnInit {
   ngOnInit(): void {
     this.categoriesSvc.getCategories().subscribe({
       next: (res) => {
-        this.toastrSvc.success(res.message);
+        // this.toastrSvc.success(res.message);
       },
       error: (error: Error) => {
-        this.toastrSvc.error(error.message);
+        // this.toastrSvc.error(error.message);
       },
     });
   }

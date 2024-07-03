@@ -5,6 +5,7 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-// router.post('/test', auth(), taskController.test);
+router.get('/', auth(), taskController.getTasks);
+router.post('/create', auth(), taskController.createTask);
 
 export default router;

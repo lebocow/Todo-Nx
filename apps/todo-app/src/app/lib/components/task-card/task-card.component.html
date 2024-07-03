@@ -23,8 +23,7 @@
     ></div>
     <input class="task-card__content__checkbox" type="checkbox" />
 
-    <p class="task-card__content__date">14:15</p>
-    <p class="task-card__content__title">Presentation title</p>
-    <p class="task-card__content__description">Blah blah</p>
+    <p class="task-card__content__date">{{ task().dueDate | date }}</p>
+    <p class="task-card__content__title">{{ task().title }}</p>
   </mat-drawer-content>
 </mat-drawer-container>

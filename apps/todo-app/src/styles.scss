@@ -92,6 +92,7 @@ $todo-app-theme: mat.define-light-theme(
   --main-color: 26, 121, 130;
   --secondary-color: 41, 222, 182;
   --white-color: 249, 255, 254;
+  --gray-color: 107 114 128;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -114,6 +115,6 @@ body {
   height: 100%;
 }
 body {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
   margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
