@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(var(--white-color));
+  padding: 1rem;
+}
+
+.delete-task-dialog {
+  &__title {
+    color: rgba(var(--main-color));
+  }
+
+  &__actions {
+    justify-content: flex-end;
+  }
+}

@@ -1,3 +1,6 @@
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,12 +9,9 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { TaskCardComponent, FloatingTaskFormComponent } from '@lib/components';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
+import { FloatingTaskFormComponent, TaskCardComponent } from '@lib/components';
 import { TaskService } from '@lib/services';
 
 @Component({

@@ -1,10 +1,10 @@
-import prisma from '../client';
-import ApiError from '../utils/ApiError';
-import { matchPassword } from '../utils';
-import httpStatus from 'http-status';
-import { exclude } from '../utils/exclude';
-import { tokenService } from '.';
 import { TokenType } from '@prisma/client';
+import httpStatus from 'http-status';
+import { tokenService } from '.';
+import prisma from '../client';
+import { matchPassword } from '../utils';
+import ApiError from '../utils/ApiError';
+import { exclude } from '../utils/exclude';
 
 export const loginUserWithEmailAndPassword = async (
   email: string,

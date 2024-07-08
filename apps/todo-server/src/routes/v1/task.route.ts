@@ -5,7 +5,11 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', auth(), taskController.getTasks);
-router.post('/create', auth(), taskController.createTask);
+router.use(auth());
+
+router.get('/', taskController.getTasks);
+router.post('/create', taskController.createTask);
+router.put('/update', taskController.updateTask);
+router.delete('/:id', taskController.deleteTaskById);
 
 export default router;

@@ -1,20 +1,20 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '@lib/services';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '@lib/services';
+import { matchValidator } from '@lib/validators/match-validator';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { BaseRegisterSchema } from '@myworkspace/data-models';
-import { matchValidator } from '@lib/validators/match-validator';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({

@@ -1,8 +1,8 @@
 import {
-  ValidatorFn,
   AbstractControl,
-  ValidationErrors,
   FormGroup,
+  ValidationErrors,
+  ValidatorFn,
 } from '@angular/forms';
 
 export function matchValidator(matchingControlName: string): ValidatorFn {

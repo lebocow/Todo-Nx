@@ -1,10 +1,10 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
 
 import { RouterOutlet } from '@angular/router';

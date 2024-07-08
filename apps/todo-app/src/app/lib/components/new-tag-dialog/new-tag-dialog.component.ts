@@ -1,16 +1,16 @@
-import { ToastrService } from 'ngx-toastr';
-import { MatIconModule } from '@angular/material/icon';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
-import { NgxColorsModule } from 'ngx-colors';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { CategoryService } from '@lib/services';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { CreateCategorySchema } from '@myworkspace/data-models';
-import { CategoryService } from '@lib/services';
+import { NgxColorsModule } from 'ngx-colors';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-new-tag-dialog',

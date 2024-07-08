@@ -1,10 +1,10 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
-import httpStatus from 'http-status';
-import ApiError from '../utils/ApiError';
-import { ZodError } from 'zod';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
+import httpStatus from 'http-status';
+import { ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
+import ApiError from '../utils/ApiError';
 
 export const errorConverter: ErrorRequestHandler = (
   err: PrismaClientKnownRequestError | ZodError | ApiError,

@@ -1,22 +1,3 @@
-import { MatFormFieldModule } from '@angular/material/form-field';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostBinding,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatCardModule } from '@angular/material/card';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import {
   animate,
   state,
@@ -24,13 +5,36 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { MatInputModule } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostBinding,
+  OnDestroy,
+  OnInit,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CategoryService, TaskService } from '@lib/services';
-import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
+import {
+  CategoryService,
+  FloatingTaskFormService,
+  TaskService,
+} from '@lib/services';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
-import { CreateTaskSchema } from '@myworkspace/data-models';
+import { CreateTaskSchema, ITask } from '@myworkspace/data-models';
+import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -76,16 +80,15 @@ import { ToastrService } from 'ngx-toastr';
   ],
 })
 export class FloatingTaskFormComponent implements OnInit, OnDestroy {
-  readonly categoriesSvc = inject(CategoryService);
-  readonly taskSvc = inject(TaskService);
-
   private readonly toastrSvc = inject(ToastrService);
 
-  dueTimeInput =
-    viewChild.required<ElementRef<HTMLInputElement>>('dueTimeInput');
+  readonly categoriesSvc = inject(CategoryService);
+  readonly taskSvc = inject(TaskService);
+  readonly floatingTaskFormSvc = inject(FloatingTaskFormService);
+
+  dueTimeInput = viewChild<ElementRef<HTMLInputElement>>('dueTimeInput');
 
   minDate = signal(new Date());
-  isOpened = signal(false);
 
   title = new FormControl('', zodValidator(CreateTaskSchema.shape.title));
   dueDate = new FormControl(
@@ -98,16 +101,16 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
     '',
     zodValidator(CreateTaskSchema.shape.description),
   );
-  categoryId = new FormControl(
+  categoryId = new FormControl<string | null>(
     null,
     zodValidator(CreateTaskSchema.shape.categoryId),
   );
 
   taskForm = new FormGroup({
     title: this.title,
+    description: this.description,
     dueDate: this.dueDate,
     dueTime: this.dueTime,
-    description: this.description,
     categoryId: this.categoryId,
   });
 
@@ -119,15 +122,35 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
     ['undo', 'redo'],
   ];
 
-  ngOnInit(): void {
-    this.editor = new Editor();
-
-    this.dueDate.valueChanges.subscribe(console.log);
-    this.dueTime.valueChanges.subscribe(console.log);
+  @HostBinding('@slideUpDown') get slideState() {
+    return this.floatingTaskFormSvc.isOpened() ? 'opened' : 'closed';
   }
 
-  @HostBinding('@slideUpDown') get slideState() {
-    return this.isOpened() ? 'opened' : 'closed';
+  constructor() {
+    effect(() => {
+      const taskData = this.floatingTaskFormSvc.taskData();
+
+      if (!taskData) return;
+
+      this.title.setValue(taskData.title);
+      this.description.setValue(taskData.description);
+      this.dueDate.setValue(new Date(taskData.dueDate));
+      this.dueTime.setValue(taskData.dueTime);
+      if (taskData.category?.id) this.categoryId.setValue(taskData.category.id);
+      if (this.dueTimeInput()) {
+        const dueTimeInput =
+          this.dueTimeInput() as ElementRef<HTMLInputElement>;
+        dueTimeInput.nativeElement.value = taskData.dueTime;
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.editor = new Editor();
+  }
+
+  populateForm(taskData: ITask) {
+    this.taskForm.patchValue(taskData);
   }
 
   onDateSelected(date: Date) {
@@ -135,46 +158,53 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
   }
 
   onSlideUp() {
-    this.isOpened.set(true);
+    this.floatingTaskFormSvc.isOpened.set(true);
   }
 
   onSlideDown() {
-    this.isOpened.set(false);
+    this.floatingTaskFormSvc.close();
     this.taskForm.reset();
-    this.dueTimeInput().nativeElement.value = '';
+    if (this.dueTimeInput()) {
+      const dueTimeInput = this.dueTimeInput() as ElementRef<HTMLInputElement>;
+      dueTimeInput.nativeElement.value = '';
+    }
   }
 
   onConfirmDueTime($event: string) {
     if (!$event) {
-      this.dueTimeInput().nativeElement.value = '';
+      if (this.dueTimeInput()) {
+        const dueTimeInput =
+          this.dueTimeInput() as ElementRef<HTMLInputElement>;
+        dueTimeInput.nativeElement.value = '';
+      }
     }
     this.dueTime.patchValue($event);
   }
 
-  onCreateTask() {
+  onSaveTask() {
     if (this.taskForm.invalid) {
       return;
     }
 
-    this.taskSvc
-      .addTask(
-        this.title.value!,
-        this.description.value!,
-        this.dueDate.value!,
-        this.dueTime.value!,
-        this.categoryId.value!,
-      )
-      .subscribe({
-        next: (res) => {
-          this.toastrSvc.success(res.message);
-        },
-        error: (error: Error) => {
-          this.toastrSvc.error(error.message);
-        },
-        complete: () => {
-          this.onSlideDown();
-        },
-      });
+    const taskData = this.floatingTaskFormSvc.taskData();
+    const operation = taskData
+      ? this.taskSvc.updateTask({
+          ...(this.taskForm.value as ITask),
+          id: taskData.id,
+        })
+      : this.taskSvc.addTask(this.taskForm.value as ITask);
+
+    operation.subscribe({
+      next: (res) => {
+        this.toastrSvc.success(res.message);
+      },
+      error: (error: Error) => {
+        this.toastrSvc.error(error.message);
+      },
+      complete: () => {
+        this.onSlideDown();
+      },
+    });
   }
 
   ngOnDestroy(): void {

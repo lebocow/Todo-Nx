@@ -1,6 +1,7 @@
 :host {
   display: block;
   position: relative;
+  transition: 300ms ease-in-out filter;
   background-color: rgba(var(--secondary-color), 0.05);
   padding: 3rem 3rem 1rem;
   height: calc(100vh - 4rem);
@@ -8,6 +9,7 @@
 
   :has(.floating-task-form--opened) & {
     filter: blur(20px);
+
     overflow: hidden;
     pointer-events: none;
     user-select: none;

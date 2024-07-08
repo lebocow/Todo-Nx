@@ -1,3 +1,5 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -5,12 +7,6 @@ import {
   signal,
   Signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '@lib/services';
 import {
   FormControl,
   FormGroup,
@@ -18,11 +14,15 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '@lib/services';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { LoginSchema } from '@myworkspace/data-models';
-import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { ToastrService } from 'ngx-toastr';
-import { HttpErrorResponse } from '@angular/common/http';
+import { injectQueryParams } from 'ngxtension/inject-query-params';
 
 @Component({
   selector: 'app-login',

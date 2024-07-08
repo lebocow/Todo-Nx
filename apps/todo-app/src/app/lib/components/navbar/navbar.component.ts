@@ -1,20 +1,20 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink } from '@angular/router';
 import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
-import { MatMenuModule } from '@angular/material/menu';
-import { AvatarModule } from 'ngx-avatars';
 import {
   AuthService,
-  UserService,
   BreakpointService,
   SidenavService,
+  UserService,
 } from '@lib/services';
+import { AvatarModule } from 'ngx-avatars';
 
 @Component({
   selector: 'app-navbar',

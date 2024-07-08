@@ -7,7 +7,6 @@ import {
   ICategoryResponse,
   ICreateCategoryResponse,
 } from '@myworkspace/data-models';
-
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 
 @Injectable({

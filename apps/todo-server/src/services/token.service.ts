@@ -1,11 +1,11 @@
 import { BaseUserSchema, ITokens } from '@myworkspace/data-models';
-import z from 'zod';
 import { TokenType } from '@prisma/client';
-import jwt from 'jsonwebtoken';
-import config from '../config/config.js';
-import prisma from '../client.js';
-import ApiError from '../utils/ApiError.js';
 import httpStatus from 'http-status';
+import jwt from 'jsonwebtoken';
+import z from 'zod';
+import prisma from '../client.js';
+import config from '../config/config.js';
+import ApiError from '../utils/ApiError.js';
 
 interface JwtPayload {
   sub: string;

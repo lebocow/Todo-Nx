@@ -1,7 +1,7 @@
-import prisma from '../client';
-import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
+import prisma from '../client';
 import { encrypt, exclude } from '../utils';
+import ApiError from '../utils/ApiError';
 
 export const createUser = async (
   email: string,

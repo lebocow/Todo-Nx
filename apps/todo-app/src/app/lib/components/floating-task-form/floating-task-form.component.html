@@ -1,5 +1,5 @@
 <div class="floating-task-calendar-form">
-  @if (isOpened()) {
+  @if (floatingTaskFormSvc.isOpened()) {
     <mat-calendar
       class="floating-task-calendar-form__calendar"
       [selected]="dueDate.value"
@@ -32,9 +32,9 @@
 </div>
 <div
   class="floating-task-form"
-  [ngClass]="{ 'floating-task-form--opened': isOpened() }"
+  [ngClass]="{ 'floating-task-form--opened': floatingTaskFormSvc.isOpened() }"
 >
-  @if (!isOpened()) {
+  @if (!floatingTaskFormSvc.isOpened()) {
     <button
       class="floating-task-form__button floating-task-form__button--add"
       [@fadeInOut]
@@ -45,7 +45,7 @@
       <mat-icon>add</mat-icon>
     </button>
   }
-  @if (isOpened()) {
+  @if (floatingTaskFormSvc.isOpened()) {
     <button
       class="floating-task-form__button floating-task-form__button--close"
       [@fadeInOut]
@@ -55,8 +55,8 @@
       <mat-icon>close</mat-icon>
     </button>
   }
-  @if (isOpened()) {
-    @defer (when isOpened()) {
+  @if (floatingTaskFormSvc.isOpened()) {
+    @defer (when floatingTaskFormSvc.isOpened()) {
       <div class="floating-task-form__content">
         <mat-form-field
           class="floating-task-form__content__field floating-task-form__content__field--title"
@@ -120,7 +120,7 @@
       <button
         class="floating-task-form__button floating-task-form__button--check"
         [disabled]="taskForm.invalid"
-        (click)="onCreateTask()"
+        (click)="onSaveTask()"
         color="accent"
         mat-raised-button
       >

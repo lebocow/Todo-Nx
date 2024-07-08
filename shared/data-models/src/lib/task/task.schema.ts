@@ -34,9 +34,9 @@ export const TaskSchema = FullTaskSchema.pick({
   dueDate: true,
   dueTime: true,
   completed: true,
-}).extend({
-  category: CategorySchema.nullable(),
+  category: true,
 });
+
 export type ITask = z.infer<typeof TaskSchema>;
 
 export const CreateTaskSchema = FullTaskSchema.pick({
@@ -47,3 +47,13 @@ export const CreateTaskSchema = FullTaskSchema.pick({
   categoryId: true,
 });
 export type ICreateTask = z.infer<typeof CreateTaskSchema>;
+
+export const UpdateTaskSchema = FullTaskSchema.pick({
+  id: true,
+  title: true,
+  description: true,
+  dueDate: true,
+  dueTime: true,
+  categoryId: true,
+});
+export type IUpdateTask = z.infer<typeof UpdateTaskSchema>;

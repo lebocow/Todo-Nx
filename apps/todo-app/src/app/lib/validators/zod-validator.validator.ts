@@ -1,6 +1,6 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { fromError } from 'zod-validation-error';
 import { ZodSchema } from 'zod';
+import { fromError } from 'zod-validation-error';
 
 export function zodValidator(schema: ZodSchema): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {

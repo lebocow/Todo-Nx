@@ -14,6 +14,10 @@
     &__icon {
       cursor: pointer;
       color: rgba(var(--secondary-color));
+
+      &:hover {
+        color: rgba(var(--white-color));
+      }
     }
   }
 
@@ -23,7 +27,7 @@
     justify-content: space-between;
     align-items: center;
     border: 0;
-    background-color: var(--secondary-color);
+    background-color: rgba(var(--secondary-color));
     width: 3rem;
   }
 
@@ -56,7 +60,6 @@
       top: 5px;
       right: 5px;
       cursor: pointer;
-      background-color: green;
       width: 2rem;
       height: 2rem;
     }

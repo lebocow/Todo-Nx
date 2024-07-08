@@ -4,8 +4,10 @@ import { environment } from '@env/environment';
 import { IApiResponse } from '@lib/interfaces';
 import {
   ICreateTaskResponse,
+  IDeleteTaskResponse,
   ITask,
-  ITaskResponse,
+  ITasksResponse,
+  IUpdateTaskResponse,
 } from '@myworkspace/data-models';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
 
@@ -18,21 +20,14 @@ export class TaskService {
   tasks = signal<ITask[]>([]);
 
   addTask(
-    title: string,
-    description: string,
-    dueDate: Date,
-    dueTime: string,
-    categoryId: string,
+    task: Omit<ITask, 'id'>,
   ): Observable<IApiResponse<ICreateTaskResponse>> {
     return this.httpClient
       .post<IApiResponse<ICreateTaskResponse>>(
         `${environment.apiUrl}/task/create`,
         {
-          title,
-          description,
-          dueDate: dueDate.toISOString(),
-          dueTime,
-          categoryId,
+          ...task,
+          dueDate: task.dueDate.toISOString(),
         },
       )
       .pipe(
@@ -49,14 +44,53 @@ export class TaskService {
       );
   }
 
-  getTasks() {
+  updateTask(task: ITask): Observable<IApiResponse<IUpdateTaskResponse>> {
     return this.httpClient
-      .get<IApiResponse<ITaskResponse>>(`${environment.apiUrl}/task`)
+      .put<
+        IApiResponse<IUpdateTaskResponse>
+      >(`${environment.apiUrl}/task/update`, task)
+      .pipe(
+        switchMap((res: IApiResponse<IUpdateTaskResponse>) => {
+          const { task } = res.data;
+
+          this.tasks.update((tasks) => {
+            return tasks.map((t) => (t.id === task.id ? task : t));
+          });
+
+          return of(res);
+        }),
+      );
+  }
+
+  getTasks(): Observable<IApiResponse<ITasksResponse>> {
+    return this.httpClient
+      .get<IApiResponse<ITasksResponse>>(`${environment.apiUrl}/task`)
       .pipe(
         switchMap((res) => {
           const { tasks } = res.data;
 
           this.tasks.set(tasks);
+
+          return of(res);
+        }),
+        catchError((error: Error) => {
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  deleteTaskById(id: string): Observable<IApiResponse<IDeleteTaskResponse>> {
+    return this.httpClient
+      .delete<
+        IApiResponse<IDeleteTaskResponse>
+      >(`${environment.apiUrl}/task/${id}`)
+      .pipe(
+        switchMap((res) => {
+          const { task } = res.data;
+
+          this.tasks.update((tasks) => {
+            return tasks.filter((t) => t.id !== task.id);
+          });
 
           return of(res);
         }),

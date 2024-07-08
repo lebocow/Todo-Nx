@@ -1,10 +1,10 @@
+import { TokenType } from '@prisma/client';
 import {
   ExtractJwt,
   Strategy as JwtStrategy,
   StrategyOptionsWithoutRequest,
   VerifyCallback,
 } from 'passport-jwt';
-import { TokenType } from '@prisma/client';
 import prisma from '../client';
 import config from './config';
 

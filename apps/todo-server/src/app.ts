@@ -1,11 +1,11 @@
 import express from 'express';
 
 import compression from 'compression';
-import helmet from 'helmet';
-import { xss } from 'express-xss-sanitizer';
 import cors from 'cors';
-import passport from 'passport';
+import { xss } from 'express-xss-sanitizer';
+import helmet from 'helmet';
 import httpStatus from 'http-status';
+import passport from 'passport';
 
 import routes from './routes/v1';
 

@@ -7,8 +7,8 @@ import {
   ICreateCategory,
   IUser,
 } from '@myworkspace/data-models';
-import { catchAsync } from '../utils';
 import httpStatus from 'http-status';
+import { catchAsync } from '../utils';
 
 export const createCategory = catchAsync(
   async (req: Request, res: Response) => {

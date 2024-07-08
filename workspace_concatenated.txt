@@ -170,9 +170,8 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/app.component.ts
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AuthService, TokenService } from '@lib/services';
 
 @Component({
   standalone: true,
@@ -316,10 +315,10 @@ export class CategoriesListComponent implements OnInit {
   ngOnInit(): void {
     this.categoriesSvc.getCategories().subscribe({
       next: (res) => {
-        this.toastrSvc.success(res.message);
+        // this.toastrSvc.success(res.message);
       },
       error: (error: Error) => {
-        this.toastrSvc.error(error.message);
+        // this.toastrSvc.error(error.message);
       },
     });
   }
@@ -334,97 +333,339 @@ export class CategoriesListComponent implements OnInit {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/delete-task-dialog/delete-task-dialog.component.html
+<p>delete-task-dialog works!</p>
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/delete-task-dialog/delete-task-dialog.component.scss
+:host {
+  display: block;
+  background-color: white;
+  padding: 1rem;
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/delete-task-dialog/delete-task-dialog.component.ts
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ITask } from '@myworkspace/data-models';
+
+@Component({
+  selector: 'app-delete-task-dialog',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './delete-task-dialog.component.html',
+  styleUrl: './delete-task-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DeleteTaskDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ITask) {
+    console.log(this.data);
+  }
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.html
+<div class="floating-task-calendar-form">
+  @if (floatingTaskFormSvc.isOpened()) {
+    <mat-calendar
+      class="floating-task-calendar-form__calendar"
+      [selected]="dueDate.value"
+      [minDate]="minDate()"
+      (selectedChange)="onDateSelected($event)"
+    />
+    <div class="floating-task-calendar-form__form">
+      <mat-form-field
+        class="floating-task-calendar-form__form__field"
+        appearance="outline"
+      >
+        <input
+          class="floating-task-calendar-form__form__field__input"
+          #dueTimeInput
+          type="time"
+          matInput
+        />
+      </mat-form-field>
+      <button
+        class="floating-task-calendar-form__form__button"
+        (click)="onConfirmDueTime(dueTimeInput.value)"
+        mat-raised-button
+        color="accent"
+      >
+        <span>Enter</span>
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  }
+</div>
 <div
   class="floating-task-form"
-  [ngClass]="{ 'floating-task-form--expanded': isExpanded() }"
+  [ngClass]="{ 'floating-task-form--opened': floatingTaskFormSvc.isOpened() }"
 >
-  <button
-    class="floating-task-form__button"
-    (click)="onToggle()"
-    mat-fab
-    color="accent"
-  >
-    <mat-icon>add</mat-icon>
-  </button>
+  @if (!floatingTaskFormSvc.isOpened()) {
+    <button
+      class="floating-task-form__button floating-task-form__button--add"
+      [@fadeInOut]
+      (click)="onSlideUp()"
+      mat-fab
+      color="accent"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+  @if (floatingTaskFormSvc.isOpened()) {
+    <button
+      class="floating-task-form__button floating-task-form__button--close"
+      [@fadeInOut]
+      (click)="onSlideDown()"
+      mat-icon-button
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+  @if (floatingTaskFormSvc.isOpened()) {
+    @defer (when floatingTaskFormSvc.isOpened()) {
+      <div class="floating-task-form__content">
+        <mat-form-field
+          class="floating-task-form__content__field floating-task-form__content__field--title"
+          color="primary"
+        >
+          <mat-label class="floating-task-form__content__field__label"
+            >Title</mat-label
+          >
+          <input
+            class="floating-task-form__content__field__input"
+            [formControl]="title"
+            matInput
+          />
+        </mat-form-field>
 
-  <div class="floating-task-form__content">
-    <h1>test</h1>
-    <h2>test</h2>
-  </div>
+        <mat-form-field
+          class="floating-task-form__content__field floating-task-form__content__field--category"
+          color="primary"
+        >
+          <mat-label class="floating-task-form__content__field__label"
+            >Choose Tag</mat-label
+          >
+          <mat-select
+            class="floating-task-form__content__field__select"
+            [formControl]="categoryId"
+          >
+            <mat-option
+              class="floating-task-form__content__field__select__option floating-task-form__content__field__select__option--none"
+              [value]="null"
+              >-- None --</mat-option
+            >
+            @for (category of categoriesSvc.categories(); track category.id) {
+              <mat-option
+                class="floating-task-form__content__field__select__option"
+                [value]="category.id"
+              >
+                {{ category.name }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div
+          class="NgxEditor__Wrapper floating-task-form__content__description-editor"
+        >
+          <ngx-editor-menu
+            class="floating-task-form__content__description-editor__editor-menu"
+            [editor]="editor"
+            [toolbar]="toolbar"
+          >
+          </ngx-editor-menu>
+          <ngx-editor
+            class="floating-task-form__content__description-editor__editor"
+            [editor]="editor"
+            [formControl]="description"
+          >
+          </ngx-editor>
+        </div>
+      </div>
+
+      <button
+        class="floating-task-form__button floating-task-form__button--check"
+        [disabled]="taskForm.invalid"
+        (click)="onSaveTask()"
+        color="accent"
+        mat-raised-button
+      >
+        <mat-icon class="floating-task-form__button--check__icon"
+          >check</mat-icon
+        >
+      </button>
+    }
+  }
 </div>
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.scss
 :host {
-  display: block;
+  display: flex;
   position: fixed;
-  right: 7.5rem;
-  bottom: -25rem;
+  right: 5vw;
+  bottom: -35rem;
+  flex-direction: column;
   animation-duration: 300ms;
-  box-shadow: var(--shadow-2xl);
+  transition: bottom 300ms ease-in-out;
+}
 
-  &:has(div.floating-task-form--expanded) {
-    bottom: 8rem;
-    animation: slideUp 300ms ease-in-out forwards;
+.floating-task-calendar-form {
+  padding: 1rem;
+
+  &__calendar {
   }
 
-  &:not(:has(div.floating-task-form--expanded)) {
-    animation: slideDown 300ms ease-in-out forwards;
+  &__form {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+
+    &__field {
+      width: 6rem;
+
+      &__input.mdc-text-field__input {
+        font-size: 1.25rem;
+        text-align: center;
+      }
+    }
+
+    &__button.mdc-button {
+      display: flex;
+      flex-grow: 1;
+      flex-direction: row-reverse;
+      gap: 0.5rem;
+      height: 3.5rem;
+      color: rgba(var(--white-color));
+    }
   }
 }
 
 .floating-task-form {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  box-shadow: var(--shadow-2xl);
   background-color: rgba(var(--white-color));
-  width: 25rem;
-  height: 30rem;
+  width: 27rem;
+  height: 40rem;
 
-  &--expanded {
-    // backdrop-filter: blur(20px);
-    // animation-duration: 1s;
-    // background-color: unset;
-    // width: 100%;
-    // height: 100%;
+  &--opened {
   }
 
   &__button {
     position: absolute;
-    top: -1.5rem;
-    left: 1.5rem;
-    color: rgba(var(--white-color));
+
+    &--add {
+      top: -1.5rem;
+      left: 1.5rem;
+      color: rgba(var(--white-color));
+    }
+
+    &--close {
+      top: 0.5rem;
+      right: 0.5rem;
+      color: #9ca3af;
+    }
+
+    &--check {
+      display: flex;
+      position: relative;
+      border-radius: 0px;
+      width: 100%;
+      height: 4rem;
+
+      &__icon.mat-icon {
+        width: 2rem;
+        height: 2rem;
+        color: rgba(var(--white-color));
+        font-size: 2rem;
+      }
+    }
   }
 
   &__content {
     display: flex;
     flex-direction: column;
-  }
-}
+    margin-bottom: auto;
+    padding: 4rem 2rem 2rem;
 
-@keyframes slideUp {
-  from {
-    bottom: -25rem;
-  }
-  to {
-    bottom: 8rem;
-  }
-}
+    &__field {
+      &--title {
+      }
 
-@keyframes slideDown {
-  from {
-    bottom: 8rem;
-  }
-  to {
-    bottom: -25rem;
+      &--category {
+      }
+
+      &__label {
+      }
+
+      &__input {
+      }
+
+      &__select {
+        &__option {
+          &--none {
+          }
+        }
+      }
+    }
+
+    &__description-editor {
+      &__editor-menu {
+      }
+
+      &__editor {
+        ::ng-deep .NgxEditor__Content {
+          height: 17rem;
+          overflow-y: scroll;
+        }
+      }
+    }
   }
 }
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/floating-task-form/floating-task-form.component.ts
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  ElementRef,
+  HostBinding,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TaskFormComponent } from '../task-form/task-form.component';
+
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCardModule } from '@angular/material/card';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { MatInputModule } from '@angular/material/input';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { CategoryService, TaskService } from '@lib/services';
+import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
+import { zodValidator } from '@lib/validators/zod-validator.validator';
+import { CreateTaskSchema, ITask } from '@myworkspace/data-models';
+import { ToastrService } from 'ngx-toastr';
+import { FloatingTaskFormService } from '@lib/services';
 
 @Component({
   selector: 'app-floating-task-form',
@@ -432,25 +673,184 @@ import { TaskFormComponent } from '../task-form/task-form.component';
   templateUrl: './floating-task-form.component.html',
   styleUrl: './floating-task-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatButtonModule, MatIconModule, TaskFormComponent],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    NgxEditorModule,
+  ],
+  providers: [provideNativeDateAdapter()],
+  animations: [
+    trigger('slideUpDown', [
+      state('closed', style({ bottom: '-35rem' })),
+      state('opened', style({ bottom: '2rem' })),
+      transition('closed <=> open', [animate('300ms ease-in-out')]),
+    ]),
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate(
+          '300ms ease-in-out',
+          style({ opacity: 1, transform: 'scale(1)' }),
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '300ms ease-in-out',
+          style({ opacity: 0, transform: 'scale(0.8)' }),
+        ),
+      ]),
+    ]),
+  ],
 })
-export class FloatingTaskFormComponent {
-  isExpanded = signal(false);
+export class FloatingTaskFormComponent implements OnInit, OnDestroy {
+  readonly categoriesSvc = inject(CategoryService);
+  readonly taskSvc = inject(TaskService);
+  readonly floatingTaskFormSvc = inject(FloatingTaskFormService);
 
-  onToggle() {
-    this.isExpanded.update((v) => !v);
+  private readonly toastrSvc = inject(ToastrService);
+
+  dueTimeInput = viewChild<ElementRef<HTMLInputElement>>('dueTimeInput');
+
+  minDate = signal(new Date());
+
+  title = new FormControl('', zodValidator(CreateTaskSchema.shape.title));
+  dueDate = new FormControl(
+    new Date(),
+    zodValidator(CreateTaskSchema.shape.dueDate),
+  );
+
+  dueTime = new FormControl('', zodValidator(CreateTaskSchema.shape.dueTime));
+  description = new FormControl(
+    '',
+    zodValidator(CreateTaskSchema.shape.description),
+  );
+  categoryId = new FormControl<string | null>(
+    null,
+    zodValidator(CreateTaskSchema.shape.categoryId),
+  );
+
+  taskForm = new FormGroup({
+    title: this.title,
+    description: this.description,
+    dueDate: this.dueDate,
+    dueTime: this.dueTime,
+    categoryId: this.categoryId,
+  });
+
+  editor!: Editor;
+  toolbar: Toolbar = [
+    ['bold', 'italic', 'underline'],
+    ['bullet_list', 'ordered_list'],
+    ['link'],
+    ['undo', 'redo'],
+  ];
+
+  @HostBinding('@slideUpDown') get slideState() {
+    return this.floatingTaskFormSvc.isOpened() ? 'opened' : 'closed';
+  }
+
+  constructor() {
+    effect(() => {
+      const taskData = this.floatingTaskFormSvc.taskData();
+
+      if (!taskData) return;
+
+      this.title.setValue(taskData.title);
+      this.description.setValue(taskData.description);
+      this.dueDate.setValue(new Date(taskData.dueDate));
+      this.dueTime.setValue(taskData.dueTime);
+      if (taskData.category?.id) this.categoryId.setValue(taskData.category.id);
+      if (this.dueTimeInput()) {
+        const dueTimeInput =
+          this.dueTimeInput() as ElementRef<HTMLInputElement>;
+        dueTimeInput.nativeElement.value = taskData.dueTime;
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.editor = new Editor();
+  }
+
+  populateForm(taskData: ITask) {
+    this.taskForm.patchValue(taskData);
+  }
+
+  onDateSelected(date: Date) {
+    this.dueDate.setValue(date);
+  }
+
+  onSlideUp() {
+    this.floatingTaskFormSvc.isOpened.set(true);
+  }
+
+  onSlideDown() {
+    this.floatingTaskFormSvc.close();
+    this.taskForm.reset();
+    if (this.dueTimeInput()) {
+      const dueTimeInput = this.dueTimeInput() as ElementRef<HTMLInputElement>;
+      dueTimeInput.nativeElement.value = '';
+    }
+  }
+
+  onConfirmDueTime($event: string) {
+    if (!$event) {
+      if (this.dueTimeInput()) {
+        const dueTimeInput =
+          this.dueTimeInput() as ElementRef<HTMLInputElement>;
+        dueTimeInput.nativeElement.value = '';
+      }
+    }
+    this.dueTime.patchValue($event);
+  }
+
+  onSaveTask() {
+    if (this.taskForm.invalid) {
+      return;
+    }
+
+    const taskData = this.floatingTaskFormSvc.taskData();
+    const operation = taskData
+      ? this.taskSvc.updateTask({
+          ...(this.taskForm.value as ITask),
+          id: taskData.id,
+        })
+      : this.taskSvc.addTask(this.taskForm.value as ITask);
+
+    operation.subscribe({
+      next: (res) => {
+        this.toastrSvc.success(res.message);
+      },
+      error: (error: Error) => {
+        this.toastrSvc.error(error.message);
+      },
+      complete: () => {
+        this.onSlideDown();
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.editor.destroy();
   }
 }
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/index.ts
 export * from './categories-list/categories-list.component';
+export * from './delete-task-dialog/delete-task-dialog.component';
 export * from './floating-task-form/floating-task-form.component';
 export * from './navbar/navbar.component';
 export * from './new-tag-dialog/new-tag-dialog.component';
 export * from './sidenav/sidenav.component';
 export * from './task-card/task-card.component';
-export * from './task-form/task-form.component';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/navbar/navbar.component.html
@@ -522,11 +922,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { SidenavComponent } from '@lib/components/sidenav/sidenav.component';
 import { MatMenuModule } from '@angular/material/menu';
-import { BreakpointService } from '@lib/services/breakpoint.service';
-import { SidenavService } from '@lib/services/sidenav.service';
 import { AvatarModule } from 'ngx-avatars';
-import { UserService } from '@lib/services/user.service';
-import { AuthService } from '@lib/services';
+import {
+  AuthService,
+  UserService,
+  BreakpointService,
+  SidenavService,
+} from '@lib/services';
 
 @Component({
   selector: 'app-navbar',
@@ -677,7 +1079,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { NgxColorsModule } from 'ngx-colors';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
 import { CreateCategorySchema } from '@myworkspace/data-models';
-import { CategoryService } from '@lib/services/category.service';
+import { CategoryService } from '@lib/services';
 
 @Component({
   selector: 'app-new-tag-dialog',
@@ -835,7 +1237,6 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       align-items: center;
-
       font-size: 1.1rem;
     }
 
@@ -894,11 +1295,17 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 <mat-drawer-container class="task-card">
   <mat-drawer class="task-card__menu" #drawer mode="side">
     <div class="icon-group">
-      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+      <mat-icon
+        class="icon-group__icon"
+        (click)="onEdit()"
+        fontSet="material-icons-outlined"
         >edit</mat-icon
       >
 
-      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+      <mat-icon
+        class="icon-group__icon"
+        (click)="onDelete()"
+        fontSet="material-icons-outlined"
         >delete</mat-icon
       >
 
@@ -916,9 +1323,8 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     ></div>
     <input class="task-card__content__checkbox" type="checkbox" />
 
-    <p class="task-card__content__date">14:15</p>
-    <p class="task-card__content__title">Presentation title</p>
-    <p class="task-card__content__description">Blah blah</p>
+    <p class="task-card__content__date">{{ task().dueDate | date }}</p>
+    <p class="task-card__content__title">{{ task().title }}</p>
   </mat-drawer-content>
 </mat-drawer-container>
 
@@ -927,6 +1333,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 .task-card {
   box-shadow: var(--shadow-xl);
   background-color: rgba(var(--white-color));
+  min-width: 0;
 
   .icon-group {
     display: flex;
@@ -939,6 +1346,10 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     &__icon {
       cursor: pointer;
       color: rgba(var(--secondary-color));
+
+      &:hover {
+        color: rgba(var(--white-color));
+      }
     }
   }
 
@@ -987,9 +1398,15 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     }
 
     &__date {
+      color: rgba(var(--gray-color));
+      font-weight: 500;
+      font-size: 0.9rem;
     }
 
     &__title {
+      color: rgba(var(--main-color));
+      font-weight: 500;
+      font-size: 1.1rem;
     }
 
     &__description {
@@ -1008,7 +1425,6 @@ import {
   HostListener,
   inject,
   input,
-  NgZone,
   viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -1017,6 +1433,20 @@ import { ITask } from '@myworkspace/data-models';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { ClickOutside } from 'ngxtension/click-outside';
+import { FloatingTaskFormService } from '@lib/services';
+import {
+  BehaviorSubject,
+  debounceTime,
+  filter,
+  map,
+  of,
+  switchMap,
+  takeUntil,
+  timer,
+} from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DeleteTaskDialogComponent } from '../delete-task-dialog/delete-task-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-task-card',
@@ -1034,73 +1464,77 @@ import { ClickOutside } from 'ngxtension/click-outside';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskCardComponent {
-  private readonly ngzone = inject(NgZone);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
+
+  private readonly floatingTaskFormSvc = inject(FloatingTaskFormService);
 
   private readonly drawer = viewChild.required<MatDrawer>('drawer');
   private readonly bar = viewChild.required<ElementRef<HTMLDivElement>>('bar');
 
-  readonly task = input<ITask>();
+  readonly task = input.required<ITask>();
 
-  private hoverTimeout: ReturnType<typeof setTimeout> | undefined;
+  private hoverState$ = new BehaviorSubject<boolean>(false);
+
+  constructor() {
+    this.hoverState$
+      .pipe(
+        debounceTime(500),
+        switchMap((isHovering) => {
+          if (isHovering) {
+            return of(true);
+          } else {
+            return timer(500).pipe(
+              takeUntil(this.hoverState$.pipe(filter((state) => state))),
+              map(() => false),
+            );
+          }
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe((shouldBeOpen) => {
+        if (shouldBeOpen) {
+          this.drawer().open();
+        } else {
+          this.drawer().close();
+        }
+        this.cdRef.detectChanges();
+      });
+  }
 
   @HostListener('mouseover', ['$event'])
   onMouseOver(event: MouseEvent) {
-    if (this.bar().nativeElement === event.target) {
-      this.ngzone.runOutsideAngular(() => {
-        this.hoverTimeout = setTimeout(() => {
-          this.drawer().open();
-          this.cdRef.detectChanges();
-        }, 500);
-      });
+    if (this.bar().nativeElement === event.target || this.drawer().opened) {
+      this.hoverState$.next(true);
     }
   }
 
   @HostListener('mouseleave', ['$event'])
   onMouseLeave(event: MouseEvent) {
-    this.ngzone.runOutsideAngular(() => {
-      clearTimeout(this.hoverTimeout);
-      setTimeout(() => {
-        this.drawer().close();
-        this.cdRef.detectChanges();
-      }, 1000);
+    this.hoverState$.next(false);
+  }
+
+  onEdit() {
+    this.floatingTaskFormSvc.openWithData(this.task());
+  }
+
+  onDelete() {
+    this.dialog.open(DeleteTaskDialogComponent, {
+      data: {
+        task: this.task(),
+      },
+      // disableClose: true,
     });
   }
 
   onOpenDrawer() {
     this.drawer().open();
-    clearTimeout(this.hoverTimeout);
   }
 
   onCloseDrawer() {
     this.drawer().close();
   }
 }
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.html
-<p>task-form works!</p>
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.scss
-:host {
-  display: block;
-}
-
-
-File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/components/task-form/task-form.component.ts
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-@Component({
-  selector: 'app-task-form',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './task-form.component.html',
-  styleUrl: './task-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TaskFormComponent {}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/guards/auth/auth.guard.ts
@@ -1540,7 +1974,10 @@ export class CategoryService {
     );
   }
 
-  addCategory(name: string, color: string) {
+  addCategory(
+    name: string,
+    color: string,
+  ): Observable<IApiResponse<ICreateCategoryResponse>> {
     return this.HttpClient.post<IApiResponse<ICreateCategoryResponse>>(
       `${environment.apiUrl}/category/create`,
       {
@@ -1562,9 +1999,38 @@ export class CategoryService {
 }
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/floating-task-form.service.ts
+import { Injectable, signal } from '@angular/core';
+import { ITask } from '@myworkspace/data-models';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class FloatingTaskFormService {
+  readonly isOpened = signal(false);
+  readonly taskData = signal<ITask | null>(null);
+
+  openWithData(taskData: ITask) {
+    this.taskData.set(taskData);
+    this.isOpened.set(true);
+  }
+
+  close() {
+    this.taskData.set(null);
+    this.isOpened.set(false);
+  }
+}
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/index.ts
 export * from './auth.service';
+export * from './breakpoint.service';
+export * from './category.service';
+export * from './floating-task-form.service';
+export * from './sidenav.service';
+export * from './task.service';
 export * from './token.service';
+export * from './user.service';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/sidenav.service.ts
@@ -1578,6 +2044,89 @@ export class SidenavService {
 
   toggleSideNav(): void {
     this.isSideNavOpen.set(!this.isSideNavOpen());
+  }
+}
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/lib/services/task.service.ts
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { environment } from '@env/environment';
+import { IApiResponse } from '@lib/interfaces';
+import {
+  ICreateTaskResponse,
+  ITask,
+  ITaskResponse,
+  IUpdateTaskResponse,
+} from '@myworkspace/data-models';
+import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class TaskService {
+  private readonly httpClient = inject(HttpClient);
+
+  tasks = signal<ITask[]>([]);
+
+  addTask(
+    task: Omit<ITask, 'id'>,
+  ): Observable<IApiResponse<ICreateTaskResponse>> {
+    return this.httpClient
+      .post<IApiResponse<ICreateTaskResponse>>(
+        `${environment.apiUrl}/task/create`,
+        {
+          ...task,
+          dueDate: task.dueDate.toISOString(),
+        },
+      )
+      .pipe(
+        switchMap((res: IApiResponse<ICreateTaskResponse>) => {
+          const { task } = res.data;
+
+          this.tasks.update((tasks) => [...tasks, task]);
+
+          return of(res);
+        }),
+        catchError((error: Error) => {
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  updateTask(task: ITask): Observable<IApiResponse<IUpdateTaskResponse>> {
+    return this.httpClient
+      .put<
+        IApiResponse<IUpdateTaskResponse>
+      >(`${environment.apiUrl}/task/update`, task)
+      .pipe(
+        switchMap((res: IApiResponse<IUpdateTaskResponse>) => {
+          const { task } = res.data;
+
+          this.tasks.update((tasks) => {
+            return tasks.map((t) => (t.id === task.id ? task : t));
+          });
+
+          return of(res);
+        }),
+      );
+  }
+
+  getTasks(): Observable<IApiResponse<ITaskResponse>> {
+    return this.httpClient
+      .get<IApiResponse<ITaskResponse>>(`${environment.apiUrl}/task`)
+      .pipe(
+        switchMap((res) => {
+          const { tasks } = res.data;
+
+          this.tasks.set(tasks);
+
+          return of(res);
+        }),
+        catchError((error: Error) => {
+          return throwError(() => error);
+        }),
+      );
   }
 }
 
@@ -1741,7 +2290,7 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     <mat-form-field>
       <mat-label>Email</mat-label>
-      <input [formControl]="email" matInput />
+      <input [formControl]="email" autocomplete="on" matInput />
       @if (email.hasError('required') && (email.dirty || email.touched)) {
         <mat-error> Email is required </mat-error>
       } @else if (
@@ -1753,7 +2302,12 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     <mat-form-field>
       <mat-label>Password</mat-label>
-      <input [formControl]="password" type="password" matInput />
+      <input
+        [formControl]="password"
+        autocomplete="on"
+        type="password"
+        matInput
+      />
       @if (password.hasError('required') && (email.dirty || password.touched)) {
         <mat-error> Password is required </mat-error>
       } @else if (
@@ -2158,11 +2712,18 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/dashboard.component.ts
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '@lib/components';
 
 import { RouterOutlet } from '@angular/router';
+import { TaskService } from '@lib/services';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-dashboard',
@@ -2172,7 +2733,21 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {}
+export class DashboardComponent implements OnInit {
+  private readonly taskSvc = inject(TaskService);
+  private readonly toastrSvc = inject(ToastrService);
+
+  ngOnInit(): void {
+    this.taskSvc.getTasks().subscribe({
+      next: (data) => {
+        this.toastrSvc.success(data.message, 'Success');
+      },
+      error: (error: Error) => {
+        this.toastrSvc.error(error.message, 'Error');
+      },
+    });
+  }
+}
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/done/done.component.html
@@ -2275,8 +2850,9 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
     </mat-chip-set>
 
     <div class="container__section__task-list">
-      <app-task-card />
-      <app-task-card />
+      @for (task of taskSvc.tasks(); track task) {
+        <app-task-card [task]="task" />
+      }
     </div>
   </div>
 
@@ -2289,29 +2865,43 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/pages/dashboard/recent/recent.component.scss
 :host {
   display: block;
+  position: relative;
+  transition: 300ms ease-in-out filter;
   background-color: rgba(var(--secondary-color), 0.05);
-  padding: 3rem;
-  width: 100%;
-  height: 100%;
+  padding: 3rem 3rem 1rem;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
 
-  :has(.floating-task-form--expanded) & {
-    // background-color: red;
+  :has(.floating-task-form--opened) & {
+    filter: blur(20px);
+
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
   }
 }
 
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 3rem;
   height: 100%;
-  grid-gap: 3rem;
+  overflow: hidden;
 
   &__section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+
     &-title {
       margin: 0;
       color: rgba(var(--main-color));
+      font-weight: 500;
     }
 
     mat-chip-set {
+      flex-shrink: 0;
       ::ng-deep .mdc-evolution-chip-set__chips {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -2321,14 +2911,13 @@ File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-app/src/app/
 
     &__task-list {
       display: flex;
+      flex: 1 1 0%;
       flex-direction: column;
       gap: 1rem;
       margin-top: 1rem;
+      overflow-y: auto;
     }
   }
-}
-
-.floating-form {
 }
 
 
@@ -2347,6 +2936,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { TaskCardComponent, FloatingTaskFormComponent } from '@lib/components';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
+import { TaskService } from '@lib/services';
 
 @Component({
   selector: 'app-recent',
@@ -2363,6 +2953,8 @@ import { ComponentPortal } from '@angular/cdk/portal';
   ],
 })
 export class RecentComponent implements OnInit, OnDestroy {
+  readonly taskSvc = inject(TaskService);
+
   private overlayRef!: OverlayRef;
   private floatingTaskFormComponentRef!: ComponentRef<FloatingTaskFormComponent>;
   private readonly overlay = inject(Overlay);
@@ -2531,6 +3123,7 @@ $todo-app-theme: mat.define-light-theme(
   --main-color: 26, 121, 130;
   --secondary-color: 41, 222, 182;
   --white-color: 249, 255, 254;
+  --gray-color: 107 114 128;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -2553,8 +3146,8 @@ body {
   height: 100%;
 }
 body {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
   margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 
@@ -2895,6 +3488,37 @@ ALTER TABLE "Category" ADD COLUMN     "userId" TEXT NOT NULL;
 ALTER TABLE "Category" ADD CONSTRAINT "Category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240626115716_init/migration.sql
+/*
+  Warnings:
+
+  - Made the column `description` on table `Task` required. This step will fail if there are existing NULL values in that column.
+  - Made the column `dueDate` on table `Task` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "description" SET NOT NULL,
+ALTER COLUMN "dueDate" SET NOT NULL;
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/20240628120933_init/migration.sql
+/*
+  Warnings:
+
+  - Added the required column `dueTime` to the `Task` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- DropForeignKey
+ALTER TABLE "Task" DROP CONSTRAINT "Task_categoryId_fkey";
+
+-- AlterTable
+ALTER TABLE "Task" ADD COLUMN     "dueTime" TEXT NOT NULL,
+ALTER COLUMN "categoryId" DROP NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/prisma/migrations/migration_lock.toml
 # Please do not edit this file manually
 # It should be added in your version-control system (i.e. Git)
@@ -2917,16 +3541,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String   @db.VarChar(255)
-  role      Role     @default(USER)
-  tasks     Task[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(uuid())
+  email      String     @unique
+  name       String
+  password   String     @db.VarChar(255)
+  role       Role       @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  tasks      Task[]
   categories Category[]
-  Token     Token[]
+  tokens     Token[]
 }
 
 model Token {
@@ -2937,31 +3561,32 @@ model Token {
   blacklisted Boolean
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
   userId      String
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Task {
   id          String    @id @default(uuid())
+  title       String    @db.VarChar(255)
+  description String
+  dueDate     DateTime
+  dueTime     String
+  completed   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  title       String    @db.VarChar(255)
-  description String?
-  dueDate     DateTime?
-  completed   Boolean   @default(false)
-  categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
   userId      String
+  categoryId  String?
   user        User      @relation(fields: [userId], references: [id])
+  category    Category? @relation(fields: [categoryId], references: [id])
 }
 
 model Category {
-  id    String @id @default(uuid())
-  name  String @db.VarChar(255)
-  color String @db.VarChar(7)
+  id     String @id @default(uuid())
+  name   String @db.VarChar(255)
+  color  String @db.VarChar(7)
   userId String
-  user  User   @relation(fields: [userId], references: [id])
-  tasks Task[]
+  user   User   @relation(fields: [userId], references: [id])
+  tasks  Task[]
 }
 
 enum Role {
@@ -3368,13 +3993,87 @@ export * as userController from './user.controller';
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/controllers/task.controller.ts
+import {
+  CreateTaskSchema,
+  ICreateTask,
+  IUpdateTask,
+  IUser,
+  UpdateTaskSchema,
+} from '@myworkspace/data-models';
 import { Request, Response } from 'express';
+import { catchAsync } from '../utils';
 
-export const createCategory = (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Hello' });
-};
+import { taskService } from '../services/';
+import httpStatus from 'http-status';
 
-export const getCategories = (req: Request, res: Response) => {
+export const createTask = catchAsync(async (req: Request, res: Response) => {
+  CreateTaskSchema.parse(req.body);
+
+  const user = req.user as IUser;
+
+  const { title, description, dueDate, dueTime, categoryId } =
+    req.body as ICreateTask;
+
+  const task = await taskService.createTask(
+    user.id,
+    title,
+    description,
+    dueDate,
+    dueTime,
+    categoryId,
+  );
+
+  return res
+    .status(httpStatus.CREATED)
+    .json({ message: `Task ${title} created successfully`, data: { task } });
+});
+
+export const getTasks = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as IUser;
+
+  const tasks = await taskService.getTasks(user.id);
+
+  return res
+    .status(httpStatus.OK)
+    .json({ message: 'Tasks retrieved successfully', data: { tasks } });
+});
+
+export const updateTask = catchAsync(async (req: Request, res: Response) => {
+  UpdateTaskSchema.parse(req.body);
+
+  const { id, title, description, dueDate, dueTime, categoryId } =
+    req.body as IUpdateTask;
+
+  const task = await taskService.updateTask(
+    id,
+    title,
+    description,
+    dueDate,
+    dueTime,
+    categoryId,
+  );
+
+  return res
+    .status(httpStatus.OK)
+    .json({ message: `Task ${title} updated successfully`, data: { task } });
+});
+
+export const deleteTaskById = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const task = await taskService.deleteTaskById(id);
+
+    return res
+      .status(httpStatus.OK)
+      .json({
+        message: `Task ${task.title} deleted successfully`,
+        data: { task },
+      });
+  },
+);
+
+export const getTaskById = (req: Request, res: Response) => {
   res.status(200).json({ message: 'Hello' });
 };
 
@@ -3522,6 +4221,7 @@ export const errorConverter: ErrorRequestHandler = (
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const statusCode = httpStatus.BAD_REQUEST;
     const message = error.message;
+
     error = new ApiError(statusCode, message, false);
   }
 
@@ -3587,8 +4287,10 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', auth(), categoryController.getCategories);
-router.post('/create', auth(), categoryController.createCategory);
+router.use(auth());
+
+router.get('/', categoryController.getCategories);
+router.post('/create', categoryController.createCategory);
 
 export default router;
 
@@ -3636,8 +4338,12 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-// router.post('/test', auth(), taskController.test);
+router.use(auth());
 
+router.get('/', taskController.getTasks);
+router.post('/create', taskController.createTask);
+router.put('/update', taskController.updateTask);
+router.delete('/delete/:id', taskController.deleteTaskById);
 export default router;
 
 
@@ -3650,9 +4356,11 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/:userId', auth(), userController.getUser);
-// router.put('/:userId', auth(), userController.updateUser);
-// router.delete('/:userId', auth(), userController.deleteUser);
+router.use(auth());
+
+router.get('/:userId', userController.getUser);
+// router.put('/:userId', userController.updateUser);
+// router.delete('/:userId', userController.deleteUser);
 
 export default router;
 
@@ -3727,10 +4435,7 @@ export const logout = async (refreshToken: string) => {
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/category.service.ts
-import { exclude } from './../utils/exclude';
-import httpStatus from 'http-status';
 import prisma from '../client';
-import ApiError from '../utils/ApiError';
 
 export const createCategory = async (
   name: string,
@@ -3761,8 +4466,6 @@ export const getCategoryById = async (id: string, userId: string) => {
     },
   });
 
-  if (!category) throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
-
   return category;
 };
 
@@ -3778,9 +4481,6 @@ export const getCategories = async (userId: string) => {
     },
   });
 
-  if (!categories)
-    throw new ApiError(httpStatus.NOT_FOUND, 'Categories not found');
-
   return categories;
 };
 
@@ -3788,8 +4488,138 @@ export const getCategories = async (userId: string) => {
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/index.ts
 export * as authService from './auth.service';
 export * as categoryService from './category.service';
+export * as taskService from './task.service';
 export * as tokenService from './token.service';
 export * as userService from './user.service';
+
+
+File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/task.service.ts
+import prisma from '../client';
+
+export const createTask = async (
+  userId: string,
+  title: string,
+  description: string,
+  dueDate: Date,
+  dueTime: string,
+  categoryId: string,
+) => {
+  const task = await prisma.task.create({
+    data: {
+      title,
+      description,
+      dueDate,
+      dueTime,
+      categoryId,
+      userId,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      dueDate: true,
+      dueTime: true,
+      completed: true,
+      category: {
+        select: {
+          id: true,
+          color: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return task;
+};
+
+export const getTasks = async (userId: string) => {
+  const tasks = await prisma.task.findMany({
+    where: {
+      userId,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      dueDate: true,
+      dueTime: true,
+      completed: true,
+      category: {
+        select: {
+          id: true,
+          color: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return tasks;
+};
+export async function updateTask(
+  id: string,
+  title: string,
+  description: string,
+  dueDate: Date,
+  dueTime: string,
+  categoryId: string,
+) {
+  const task = await prisma.task.update({
+    where: {
+      id,
+    },
+    data: {
+      title,
+      description,
+      dueDate,
+      dueTime,
+      categoryId,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      dueDate: true,
+      dueTime: true,
+      completed: true,
+      category: {
+        select: {
+          id: true,
+          color: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return task;
+}
+
+export const deleteTaskById = async (id: string) => {
+  const task = await prisma.task.delete({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      dueDate: true,
+      dueTime: true,
+      completed: true,
+      category: {
+        select: {
+          id: true,
+          color: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return task;
+};
 
 
 File: /Users/ursachianualexandru/Desktop/Todo/myworkspace/apps/todo-server/src/services/token.service.ts

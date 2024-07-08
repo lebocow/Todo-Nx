@@ -1,9 +1,15 @@
-import { CreateTaskSchema, ICreateTask, IUser } from '@myworkspace/data-models';
+import {
+  CreateTaskSchema,
+  ICreateTask,
+  IUpdateTask,
+  IUser,
+  UpdateTaskSchema,
+} from '@myworkspace/data-models';
 import { Request, Response } from 'express';
 import { catchAsync } from '../utils';
 
-import { taskService } from '../services/';
 import httpStatus from 'http-status';
+import { taskService } from '../services/';
 
 export const createTask = catchAsync(async (req: Request, res: Response) => {
   CreateTaskSchema.parse(req.body);
@@ -14,12 +20,12 @@ export const createTask = catchAsync(async (req: Request, res: Response) => {
     req.body as ICreateTask;
 
   const task = await taskService.createTask(
+    user.id,
     title,
     description,
     dueDate,
     dueTime,
     categoryId,
-    user.id,
   );
 
   return res
@@ -37,13 +43,38 @@ export const getTasks = catchAsync(async (req: Request, res: Response) => {
     .json({ message: 'Tasks retrieved successfully', data: { tasks } });
 });
 
-export const updateTask = (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Hello' });
-};
+export const updateTask = catchAsync(async (req: Request, res: Response) => {
+  UpdateTaskSchema.parse(req.body);
 
-export const deleteTask = (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Hello' });
-};
+  const { id, title, description, dueDate, dueTime, categoryId } =
+    req.body as IUpdateTask;
+
+  const task = await taskService.updateTask(
+    id,
+    title,
+    description,
+    dueDate,
+    dueTime,
+    categoryId,
+  );
+
+  return res
+    .status(httpStatus.OK)
+    .json({ message: `Task ${title} updated successfully`, data: { task } });
+});
+
+export const deleteTaskById = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const task = await taskService.deleteTaskById(id);
+
+    return res.status(httpStatus.OK).json({
+      message: `Task ${task.title} deleted successfully`,
+      data: { task },
+    });
+  },
+);
 
 export const getTaskById = (req: Request, res: Response) => {
   res.status(200).json({ message: 'Hello' });

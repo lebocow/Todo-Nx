@@ -1,12 +1,12 @@
-import { BreakpointService } from '@lib/services/breakpoint.service';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { SidenavService } from '@lib/services/sidenav.service';
 import { CategoriesListComponent } from '@lib/components';
+import { BreakpointService } from '@lib/services/breakpoint.service';
+import { SidenavService } from '@lib/services/sidenav.service';
 
 @Component({
   selector: 'app-sidenav',

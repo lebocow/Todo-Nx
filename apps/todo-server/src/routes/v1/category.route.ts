@@ -5,7 +5,9 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', auth(), categoryController.getCategories);
-router.post('/create', auth(), categoryController.createCategory);
+router.use(auth());
+
+router.get('/', categoryController.getCategories);
+router.post('/create', categoryController.createCategory);
 
 export default router;

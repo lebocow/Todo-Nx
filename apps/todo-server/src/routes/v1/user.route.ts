@@ -6,8 +6,10 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/:userId', auth(), userController.getUser);
-// router.put('/:userId', auth(), userController.updateUser);
-// router.delete('/:userId', auth(), userController.deleteUser);
+router.use(auth());
+
+router.get('/:userId', userController.getUser);
+// router.put('/:userId', userController.updateUser);
+// router.delete('/:userId', userController.deleteUser);
 
 export default router;

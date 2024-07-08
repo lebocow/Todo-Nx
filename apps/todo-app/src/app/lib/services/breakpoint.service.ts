@@ -1,17 +1,16 @@
-import { computed, inject, Injectable } from '@angular/core';
 import {
   BreakpointObserver,
   Breakpoints,
   BreakpointState,
 } from '@angular/cdk/layout';
+import { computed, inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   distinctUntilChanged,
   map,
   shareReplay,
   startWith,
 } from 'rxjs/operators';
-
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',

@@ -1,4 +1,4 @@
-import { MatListModule } from '@angular/material/list';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
+import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbar } from '@angular/material/toolbar';
 import { CategoryService } from '@lib/services/category.service';

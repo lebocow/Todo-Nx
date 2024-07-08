@@ -6,7 +6,17 @@ export const CreateTaskResponseSchema = z.object({
 });
 export type ICreateTaskResponse = z.infer<typeof CreateTaskResponseSchema>;
 
-export const TaskResponseSchema = z.object({
+export const UpdateTaskResponseSchema = z.object({
+  task: TaskSchema,
+});
+export type IUpdateTaskResponse = z.infer<typeof UpdateTaskResponseSchema>;
+
+export const TasksResponseSchema = z.object({
   tasks: z.array(TaskSchema),
 });
-export type ITaskResponse = z.infer<typeof TaskResponseSchema>;
+export type ITasksResponse = z.infer<typeof TasksResponseSchema>;
+
+export const DeleteTaskResponseSchema = z.object({
+  task: TaskSchema,
+});
+export type IDeleteTaskResponse = z.infer<typeof DeleteTaskResponseSchema>;

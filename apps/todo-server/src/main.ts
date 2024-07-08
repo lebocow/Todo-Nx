@@ -1,6 +1,6 @@
 import { Server } from 'http';
-import prisma from './client';
 import app from './app';
+import prisma from './client';
 import config from './config/config';
 
 let server: Server;

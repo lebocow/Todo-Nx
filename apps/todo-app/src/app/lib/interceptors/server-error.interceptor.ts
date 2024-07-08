@@ -7,7 +7,7 @@ import {
 import { inject } from '@angular/core';
 
 import { AuthService, TokenService } from '@lib/services';
-import { catchError, switchMap, throwError, EMPTY } from 'rxjs';
+import { EMPTY, catchError, switchMap, throwError } from 'rxjs';
 
 export const serverErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const authSvc = inject(AuthService);

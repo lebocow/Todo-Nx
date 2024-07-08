@@ -1,6 +1,6 @@
 export const exclude = <Type, Key extends keyof Type>(
   obj: Type,
-  keys: Key[]
+  keys: Key[],
 ): Omit<Type, Key> => {
   for (const key of keys) {
     delete obj[key];

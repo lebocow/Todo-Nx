@@ -1,11 +1,17 @@
 <mat-drawer-container class="task-card">
   <mat-drawer class="task-card__menu" #drawer mode="side">
     <div class="icon-group">
-      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+      <mat-icon
+        class="icon-group__icon"
+        (click)="onEdit()"
+        fontSet="material-icons-outlined"
         >edit</mat-icon
       >
 
-      <mat-icon class="icon-group__icon" fontSet="material-icons-outlined"
+      <mat-icon
+        class="icon-group__icon"
+        (click)="onDelete()"
+        fontSet="material-icons-outlined"
         >delete</mat-icon
       >
 
@@ -18,12 +24,15 @@
     <div
       class="task-card__content__bar"
       #bar
+      [ngStyle]="{ 'background-color': task().category?.color }"
       (clickOutside)="onCloseDrawer()"
       (click)="onOpenDrawer()"
     ></div>
     <input class="task-card__content__checkbox" type="checkbox" />
 
     <p class="task-card__content__date">{{ task().dueDate | date }}</p>
-    <p class="task-card__content__title">{{ task().title }}</p>
+    <p class="task-card__content__title">
+      {{ task().title }}
+    </p>
   </mat-drawer-content>
 </mat-drawer-container>

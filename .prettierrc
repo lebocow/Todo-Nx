@@ -2,6 +2,7 @@
   "singleQuote": true,
   "plugins": [
     "prettier-plugin-organize-attributes",
-    "prettier-plugin-css-order"
+    "prettier-plugin-css-order",
+    "prettier-plugin-organize-imports"
   ]
 }

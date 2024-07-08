@@ -1,18 +1,17 @@
-import { environment } from './../../../environments/environment';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { IApiResponse } from '@lib/interfaces';
 import {
   ILoginResponse,
   IRefreshTokenResponse,
   IRegisterResponse,
 } from '@myworkspace/data-models';
-import { inject, Injectable, signal } from '@angular/core';
-
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import { TokenType } from '@prisma/client';
+import { Observable, catchError, of, switchMap, throwError } from 'rxjs';
+import { environment } from './../../../environments/environment';
 import { TokenService } from './token.service';
 import { UserService } from './user.service';
-import { IApiResponse } from '@lib/interfaces';
-import { TokenType } from '@prisma/client';
-import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
