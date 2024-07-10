@@ -33,7 +33,7 @@ import {
   TaskService,
 } from '@lib/services';
 import { zodValidator } from '@lib/validators/zod-validator.validator';
-import { CreateTaskSchema, ITask } from '@myworkspace/data-models';
+import { CreateTaskSchema, ITask, IUpdateTask } from '@myworkspace/data-models';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { ToastrService } from 'ngx-toastr';
 
@@ -189,7 +189,7 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
     const taskData = this.floatingTaskFormSvc.taskData();
     const operation = taskData
       ? this.taskSvc.updateTask({
-          ...(this.taskForm.value as ITask),
+          ...(this.taskForm.value as IUpdateTask),
           id: taskData.id,
         })
       : this.taskSvc.addTask(this.taskForm.value as ITask);

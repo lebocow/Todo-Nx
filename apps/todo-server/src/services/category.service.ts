@@ -15,10 +15,18 @@ export const createCategory = async (
       id: true,
       name: true,
       color: true,
+      _count: {
+        select: { tasks: true },
+      },
     },
   });
 
-  return category;
+  return {
+    id: category.id,
+    name: category.name,
+    color: category.color,
+    tasksCount: category._count.tasks,
+  };
 };
 
 export const getCategoryById = async (id: string, userId: string) => {
@@ -41,8 +49,16 @@ export const getCategories = async (userId: string) => {
       id: true,
       name: true,
       color: true,
+      _count: {
+        select: { tasks: true },
+      },
     },
   });
 
-  return categories;
+  return categories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    color: category.color,
+    tasksCount: category._count.tasks,
+  }));
 };

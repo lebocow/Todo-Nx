@@ -31,6 +31,7 @@
 
     &-title {
       margin: 0;
+      margin-bottom: 1rem;
       color: rgba(var(--main-color));
       font-weight: 500;
     }
@@ -44,12 +45,61 @@
       }
     }
 
+    &__chip_list {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      margin: -1rem;
+      padding: 1rem;
+      overflow-x: auto;
+
+      &__chip {
+        display: flex;
+        position: relative;
+        box-shadow: var(--shadow-md);
+        background-color: rgba(var(--white-color));
+
+        &__title {
+          margin: 0;
+          padding: 0.5rem;
+          max-width: 10rem;
+          overflow: hidden;
+          color: rgba(var(--main-color));
+          font-weight: 500;
+          font-size: 1.1rem;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        &__number {
+          position: relative;
+          margin: 0;
+          padding: 0.5rem 0.7rem;
+          color: rgba(var(--secondary-color));
+          font-weight: 500;
+          font-size: 1.1rem;
+          text-align: center;
+
+          &::before {
+            position: absolute;
+            top: 5%;
+            left: 0;
+            background-color: rgba(var(--secondary-color));
+            width: 1px;
+            height: 90%;
+            content: '';
+          }
+        }
+      }
+    }
+
     &__task-list {
       display: flex;
       flex: 1 1 0%;
       flex-direction: column;
       gap: 1rem;
-      margin-top: 1rem;
+      margin: 1rem -1rem -1rem -1rem;
+      padding: 1rem;
       overflow-y: auto;
     }
   }

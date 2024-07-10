@@ -7,15 +7,19 @@ import {
   IDeleteTaskResponse,
   ITask,
   ITasksResponse,
+  IUpdateTask,
   IUpdateTaskResponse,
 } from '@myworkspace/data-models';
 import { catchError, Observable, of, switchMap, throwError } from 'rxjs';
+import { CategoryService } from './category.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   private readonly httpClient = inject(HttpClient);
+
+  private readonly categorySvc = inject(CategoryService);
 
   tasks = signal<ITask[]>([]);
 
@@ -36,6 +40,18 @@ export class TaskService {
 
           this.tasks.update((tasks) => [...tasks, task]);
 
+          this.categorySvc.categories.update((categories) => {
+            return categories.map((category) => {
+              if (category.id === task.category?.id) {
+                return {
+                  ...category,
+                  tasksCount: category.tasksCount + 1,
+                };
+              }
+              return category;
+            });
+          });
+
           return of(res);
         }),
         catchError((error: Error) => {
@@ -44,17 +60,41 @@ export class TaskService {
       );
   }
 
-  updateTask(task: ITask): Observable<IApiResponse<IUpdateTaskResponse>> {
+  updateTask(task: IUpdateTask): Observable<IApiResponse<IUpdateTaskResponse>> {
+    const originalCategoryId = this.tasks().find((t) => t.id === task.id)
+      ?.category?.id;
+
     return this.httpClient
       .put<
         IApiResponse<IUpdateTaskResponse>
       >(`${environment.apiUrl}/task/update`, task)
       .pipe(
         switchMap((res: IApiResponse<IUpdateTaskResponse>) => {
-          const { task } = res.data;
+          const { task: updatedTask } = res.data;
 
           this.tasks.update((tasks) => {
-            return tasks.map((t) => (t.id === task.id ? task : t));
+            return tasks.map((t) =>
+              t.id === updatedTask.id ? updatedTask : t,
+            );
+          });
+
+          this.categorySvc.categories.update((categories) => {
+            return categories.map((category) => {
+              if (
+                category.id === updatedTask.category?.id &&
+                category.id !== originalCategoryId
+              ) {
+                return { ...category, tasksCount: category.tasksCount + 1 };
+              }
+              if (
+                category.id === originalCategoryId &&
+                category.id !== updatedTask.category?.id
+              ) {
+                return { ...category, tasksCount: category.tasksCount - 1 };
+              }
+
+              return category;
+            });
           });
 
           return of(res);

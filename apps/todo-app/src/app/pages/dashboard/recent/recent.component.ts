@@ -5,14 +5,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   ComponentRef,
-  inject,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatRippleModule } from '@angular/material/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { FloatingTaskFormComponent, TaskCardComponent } from '@lib/components';
-import { TaskService } from '@lib/services';
+import { CategoryService, TaskService } from '@lib/services';
 
 @Component({
   selector: 'app-recent',
@@ -26,10 +27,12 @@ import { TaskService } from '@lib/services';
     MatSidenavModule,
     TaskCardComponent,
     FloatingTaskFormComponent,
+    MatRippleModule,
   ],
 })
 export class RecentComponent implements OnInit, OnDestroy {
   readonly taskSvc = inject(TaskService);
+  readonly categorySvc = inject(CategoryService);
 
   private overlayRef!: OverlayRef;
   private floatingTaskFormComponentRef!: ComponentRef<FloatingTaskFormComponent>;

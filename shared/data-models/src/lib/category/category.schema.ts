@@ -10,6 +10,7 @@ export const CreateCategorySchema = z.object({
 
 export const CategorySchema = CreateCategorySchema.extend({
   id: z.string().uuid(),
+  tasksCount: z.number().int(),
 });
 
 export type ICreateCategory = z.infer<typeof CreateCategorySchema>;

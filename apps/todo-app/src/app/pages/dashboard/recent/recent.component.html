@@ -1,23 +1,25 @@
 <div class="container">
   <div class="container__section">
     <h1 class="container__section-title">Today</h1>
-    <mat-chip-set aria-label="Fish selection">
-      <mat-chip><span>One fish</span></mat-chip>
-      <mat-chip>Two fish</mat-chip>
-      <mat-chip>Three fish</mat-chip>
-      <mat-chip>Four fish</mat-chip>
-      <mat-chip>Five fish</mat-chip>
-      <mat-chip>Six fish</mat-chip>
-      <mat-chip>Seven fish</mat-chip>
-      <mat-chip>Eight fish</mat-chip>
-      <mat-chip>Nine fish</mat-chip>
-      <mat-chip>Ten fish</mat-chip>
-      <mat-chip>Eleven fish</mat-chip>
-    </mat-chip-set>
+
+    <div class="container__section__chip_list">
+      @for (category of categorySvc.categories(); track category) {
+        <div class="container__section__chip_list__chip" matRipple>
+          <p class="container__section__chip_list__chip__title">
+            {{ category.name }}
+          </p>
+          <p class="container__section__chip_list__chip__number">
+            {{ category.tasksCount }}
+          </p>
+        </div>
+      }
+    </div>
 
     <div class="container__section__task-list">
       @for (task of taskSvc.tasks(); track task) {
         <app-task-card [task]="task" />
+      } @empty {
+        <div class="container__section__task-list__empty">No tasks found</div>
       }
     </div>
   </div>
