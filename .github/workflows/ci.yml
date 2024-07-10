@@ -31,19 +31,18 @@ jobs:
           git rev-parse HEAD
           git status
           pwd
-          ls -la
       
       - name: Check Nx Configuration
         run: cat nx.json
       
       - name: Check Prisma Schema
-        run: cat prisma/schema.prisma
+        run: cat apps/todo-server/prisma/schema.prisma
       
       - name: Generate Prisma Client
-        run: npx prisma generate
+        run: npx nx run todo-server:prisma-generate
       
       - name: Check Prisma Client
-        run: ls -R node_modules/.prisma
+        run: ls -R apps/todo-server/node_modules/.prisma
       
       - name: Check Prisma Version
         run: npx prisma --version
