@@ -1,15 +1,12 @@
 name: CI
-
 on:
   push:
     branches:
       - main
   pull_request:
-
 permissions:
   actions: read
   contents: read
-
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -17,21 +14,32 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      # Connect your workspace on nx.app and uncomment this to enable task distribution.
-      # The "--stop-agents-after" is optional, but allows idle agents to shut down once the "build" targets have been requested
-      # - run: npx nx-cloud start-ci-run --distribute-on="5 linux-medium-js" --stop-agents-after="build"
-
-      # Cache node_modules
       - uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'npm'
       - run: npm ci
       - uses: nrwl/nx-set-shas@v4
-
       - run: git branch --track main origin/main
         if: ${{ github.event_name == 'pull_request' }}
-
-      - run: npx nx-cloud record -- nx format:check
+      
+      - name: Environment Info
+        run: |
+          node --version
+          npm --version
+          npx nx --version
+          git rev-parse HEAD
+          git status
+          pwd
+          ls -la
+      
+      - name: Check Nx Configuration
+        run: cat nx.json
+      
+      - name: List Affected Files
+        run: npx nx print-affected --select=projects
+      
+      - run: npx nx format:write
+      - run: npx nx format:check --verbose
+      
       - run: npx nx affected -t lint test build
