@@ -36,8 +36,23 @@ jobs:
       - name: Check Nx Configuration
         run: cat nx.json
       
+      - name: Check Prisma Schema
+        run: cat prisma/schema.prisma
+      
+      - name: Generate Prisma Client
+        run: npx prisma generate
+      
+      - name: Check Prisma Client
+        run: ls -R node_modules/.prisma
+      
+      - name: Check Prisma Version
+        run: npx prisma --version
+      
       - name: List Affected Files
         run: npx nx print-affected --select=projects
+      
+      - name: TypeScript Check
+        run: npx tsc --noEmit
       
       - run: npx nx format:write
       - run: npx nx format:check --verbose
