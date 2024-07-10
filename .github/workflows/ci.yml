@@ -39,7 +39,7 @@ jobs:
         run: cat apps/todo-server/prisma/schema.prisma
       
       - name: Generate Prisma Client
-        run: npx nx run todo-server:prisma-generate
+        run: npm run prisma:generate
       
       - name: Check Prisma Client
         run: ls -R apps/todo-server/node_modules/.prisma
@@ -51,7 +51,7 @@ jobs:
         run: npx nx print-affected --select=projects
       
       - name: TypeScript Check
-        run: npx tsc --noEmit
+        run: npx nx run-many --target=type-check --all
       
       - run: npx nx format:write
       - run: npx nx format:check --verbose
