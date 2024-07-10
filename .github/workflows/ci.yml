@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4  # Updated to v4
         with:
           node-version: 20
           cache: 'npm'
@@ -22,7 +22,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
       - run: git branch --track main origin/main
         if: ${{ github.event_name == 'pull_request' }}
-      
       - name: Environment Info
         run: |
           node --version
@@ -31,16 +30,12 @@ jobs:
           git rev-parse HEAD
           git status
           pwd
-      
       - name: Check Nx Configuration
         run: cat nx.json
-      
       - name: Check Prisma Schema
         run: cat apps/todo-server/prisma/schema.prisma
-      
       - name: Generate Prisma Client
         run: npm run prisma:generate
-      
       - name: Debug Prisma Client Generation
         run: |
           echo "Current directory:"
@@ -51,17 +46,12 @@ jobs:
           ls -R node_modules/.prisma || echo "No .prisma in root node_modules"
           echo "Contents of apps/todo-server/node_modules:"
           ls -R apps/todo-server/node_modules/.prisma || echo "No .prisma in todo-server node_modules"
-      
       - name: Check Prisma Version
         run: npx prisma --version
-      
       - name: List Affected Files
         run: npx nx print-affected --select=projects
-      
       - name: TypeScript Check
         run: npx nx run-many --target=type-check --all
-      
       - run: npx nx format:write
       - run: npx nx format:check --verbose
-      
       - run: npx nx affected -t lint test build
