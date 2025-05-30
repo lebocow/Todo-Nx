@@ -4,6 +4,14 @@
   z-index: 1;
 }
 
+.navbar {
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
 .user {
   &__info {
     display: flex;

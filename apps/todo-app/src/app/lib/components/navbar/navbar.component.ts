@@ -12,6 +12,7 @@ import {
   AuthService,
   BreakpointService,
   SidenavService,
+  ThemeService,
   UserService,
 } from '@lib/services';
 import { AvatarModule } from 'ngx-avatars';
@@ -39,11 +40,16 @@ export class NavbarComponent {
   readonly breakpointSvc = inject(BreakpointService);
   readonly userSvc = inject(UserService);
   readonly authSvc = inject(AuthService);
+  readonly themeSvc = inject(ThemeService);
 
   private readonly sidenavSvc = inject(SidenavService);
 
   onToggleSidenav() {
     this.sidenavSvc.toggleSideNav();
+  }
+
+  onToggleTheme() {
+    this.themeSvc.toggleTheme();
   }
 
   onLogout() {

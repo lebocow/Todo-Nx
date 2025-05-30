@@ -4,19 +4,12 @@
 
     <div class="container__section__chip_list">
       @for (category of categorySvc.categories(); track category) {
-        <div class="container__section__chip_list__chip" matRipple>
-          <p class="container__section__chip_list__chip__title">
-            {{ category.name }}
-          </p>
-          <p class="container__section__chip_list__chip__number">
-            {{ category.tasksCount }}
-          </p>
-        </div>
+        <app-category-chip [category]="category" />
       }
     </div>
 
     <div class="container__section__task-list">
-      @for (task of taskSvc.tasks(); track task) {
+      @for (task of filteredTasks(); track task) {
         <app-task-card [task]="task" />
       } @empty {
         <div class="container__section__task-list__empty">No tasks found</div>

@@ -119,14 +119,20 @@
 
       <button
         class="floating-task-form__button floating-task-form__button--check"
-        [disabled]="taskForm.invalid"
+        [disabled]="taskForm.invalid || isSubmitting()"
         (click)="onSaveTask()"
         color="accent"
         mat-raised-button
       >
-        <mat-icon class="floating-task-form__button--check__icon"
-          >check</mat-icon
-        >
+        @if (isSubmitting()) {
+          <mat-icon class="floating-task-form__button--check__icon spinning">
+            refresh
+          </mat-icon>
+        } @else {
+          <mat-icon class="floating-task-form__button--check__icon">
+            check
+          </mat-icon>
+        }
       </button>
     }
   }

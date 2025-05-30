@@ -72,7 +72,7 @@ $todo-app-primary: mat.define-palette($main-palette);
 $todo-app-accent: mat.define-palette($secondary-palette);
 $todo-app-warn: mat.define-palette(mat.$red-palette);
 
-$todo-app-theme: mat.define-light-theme(
+$todo-app-light-theme: mat.define-light-theme(
   (
     color: (
       primary: $todo-app-primary,
@@ -84,7 +84,35 @@ $todo-app-theme: mat.define-light-theme(
   )
 );
 
-@include mat.all-component-themes($todo-app-theme);
+$todo-app-dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: $todo-app-primary,
+      accent: $todo-app-accent,
+      warn: $todo-app-warn,
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
+
+// Include base theme styles (typography and density)
+@include mat.core-theme($todo-app-light-theme);
+
+// Apply light theme by default
+.light-theme {
+  @include mat.all-component-themes($todo-app-light-theme);
+}
+
+// Dark theme styles
+.dark-theme {
+  @include mat.all-component-themes($todo-app-dark-theme);
+}
+
+// Default to light theme if no class is applied
+:root:not(.dark-theme):not(.light-theme) {
+  @include mat.all-component-themes($todo-app-light-theme);
+}
 
 /* You can add global styles to this file, and also import other style files */
 

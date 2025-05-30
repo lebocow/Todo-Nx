@@ -56,7 +56,7 @@ export class TaskCardComponent {
 
   readonly task = input.required<ITask>();
 
-  private hoverState$ = new BehaviorSubject<boolean>(false);
+  private readonly hoverState$ = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.hoverState$

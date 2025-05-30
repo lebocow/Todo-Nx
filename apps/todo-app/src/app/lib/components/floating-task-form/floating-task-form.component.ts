@@ -89,6 +89,7 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
   dueTimeInput = viewChild<ElementRef<HTMLInputElement>>('dueTimeInput');
 
   minDate = signal(new Date());
+  isSubmitting = signal(false);
 
   title = new FormControl('', zodValidator(CreateTaskSchema.shape.title));
   dueDate = new FormControl(
@@ -182,9 +183,11 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
   }
 
   onSaveTask() {
-    if (this.taskForm.invalid) {
+    if (this.taskForm.invalid || this.isSubmitting()) {
       return;
     }
+
+    this.isSubmitting.set(true);
 
     const taskData = this.floatingTaskFormSvc.taskData();
     const operation = taskData
@@ -197,12 +200,14 @@ export class FloatingTaskFormComponent implements OnInit, OnDestroy {
     operation.subscribe({
       next: (res) => {
         this.toastrSvc.success(res.message);
+        this.onSlideDown();
       },
       error: (error: Error) => {
         this.toastrSvc.error(error.message);
+        this.isSubmitting.set(false);
       },
       complete: () => {
-        this.onSlideDown();
+        this.isSubmitting.set(false);
       },
     });
   }

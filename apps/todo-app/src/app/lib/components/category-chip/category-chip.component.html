@@ -1,0 +1,14 @@
+<div 
+  class="category-chip" 
+  [class.category-chip--selected]="isSelected()"
+  [style.--category-color]="category().color"
+  (click)="onCategoryClick()" 
+  matRipple
+>
+  <p class="category-chip__title">
+    {{ category().name }}
+  </p>
+  <p class="category-chip__number">
+    {{ category().tasksCount }}
+  </p>
+</div>
